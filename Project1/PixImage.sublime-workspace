@@ -1,0 +1,405 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"testS",
+				"testSquishHelper"
+			],
+			[
+				"total",
+				"totalDuplicates"
+			],
+			[
+				"diffe",
+				"differenceHelper"
+			],
+			[
+				"diff",
+				"diffMoreOneYear"
+			],
+			[
+				"daysIn",
+				"daysInYear"
+			],
+			[
+				"leap",
+				"isLeapYear"
+			],
+			[
+				"day",
+				"dayInYear"
+			],
+			[
+				"days",
+				"daysInMonth"
+			],
+			[
+				"com",
+				"complementWatsonCrick"
+			],
+			[
+				"readB",
+				"readBoolean1D"
+			],
+			[
+				"attraction",
+				"attractionStrength"
+			],
+			[
+				"attrac",
+				"attractionStrength"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 479.0,
+		"last_filter": "Package Control: ",
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 549.0
+	},
+	"console":
+	{
+		"height": 150.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'df21e130d211cfc94d9b0905775a7c0f' + '1e3d39e33b79698005270310898eea76'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Programming/Goo/CS61B/Lab4/DListNode1.java",
+		"/C/_Work/workspace/Tizen/GearHub/config.xml",
+		"/C/_Work/workspace/Tizen/GearHub/js/main.js",
+		"/C/_Work/workspace/Tizen/ghubsvc/inc/ghubsvc.h",
+		"/C/_Work/workspace/Tizen/ghubsvc/src/gh_event_handler.c",
+		"/C/_Work/workspace/Tizen/ghubsvc/src/gh_push_recv.c",
+		"/C/Users/TecAce/SamsungCertificate/JeffYang/device-profile.xml",
+		"/C/Programming/Goo/CS61B/HW3/TestHelper.java",
+		"/C/_Work/workspace/Tizen/GearHub/.package/config.xml",
+		"/C/_Work/workspace/Tizen/ghubsvc/Debug/build.ninja",
+		"/C/_Work/workspace/Tizen/ghubsvc/Debug/ghubsvc",
+		"/C/Programming/Goo/CS61B/Lab3/SListNode.java",
+		"/C/Programming/Goo/CS61B/Lab3/SList.java",
+		"/C/Users/TecAce/Desktop/1.3_Family_Samsung_Pay_chapter.json",
+		"/C/_Work/workspace/Tizen/nestcameragear/gulpfile.js",
+		"/C/_Work/Projects/RM_Service/Release/06302017/SERVICES_CMS_ASSET_1/chapter/1.1_Family_Samsung_Health_chapter.json",
+		"/C/Users/TecAce/Desktop/4.3_Professional_Samsung_Connect_chapter.json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/H1F6ZCOI/3.1_Techie_Samsung_Connect_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/5OM180TS/4.1_Professional_Bixby_voice_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/5OM180TS/4.3_Professional_Samsung_Connect_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/5OM180TS/4.3_Professional_Samsung_Connect_chapter[2].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/W65K155E/3.2_Techie_Bixby_voice_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/H1F6ZCOI/3.2_Techie_Bixby_voice_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/5OM180TS/3.1_Techie_Samsung_Connect_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/W65K155E/3.1_Techie_Samsung_Connect_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/TM4BQS5H/2.3_Student_Bixby_reminder_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/H1F6ZCOI/2.2_Student_Samsung_Health_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/W65K155E/1.3_Family_Samsung_Pay_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/TM4BQS5H/1.2_Family_Bixby_sees_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/H1F6ZCOI/1.1_Family_Samsung_Health_chapter[1].json",
+		"/C/Users/TecAce/AppData/Local/Microsoft/Windows/INetCache/IE/W65K155E/_4.3_Professional_Samsung_Connect_chapter[1].json",
+		"/C/Programming/Goo/CS61B/HW2/Date.java",
+		"/C/Programming/Goo/CS61B/Linked Lists/ListNode.java",
+		"/C/Programming/Goo/CS61B/HFJ/TestFormats.java",
+		"/C/Programming/Goo/CS61B/List.java",
+		"/C/Programming/Goo/CS61B/ListNode.java",
+		"/C/Programming/Goo/CS61B/SListNode.java",
+		"/C/Programming/Goo/CS61B/SList.java",
+		"/C/Programming/Goo/CS61B/DListNode.java",
+		"/C/Programming/Goo/CS61B/DList.java",
+		"/C/_Work/workspace/Tizen/nestcameragear/app/CameraWatchFace/gulpfile.js",
+		"/C/_Work/_Repos/nestcameragear/gulpfile.js",
+		"/C/Users/TecAce/AppData/Local/Temp/7zOC12A7414/attractor.json",
+		"/C/Users/TecAce/Desktop/SERVICES_CMS_ASSET/chapter/1.1_Family_Samsung_Health_chapter.json",
+		"/C/Users/TecAce/AppData/Local/Temp/7zOC33699FC/JavaC.sublime-build",
+		"/C/Users/TecAce/Desktop/JavaC.sublime-build",
+		"/C/Program Files/Sublime Text 3/Java.sublime-package",
+		"/C/Users/TecAce/AppData/Local/Temp/7zO0E23392C/JavaC.sublime-build",
+		"/C/_Work/Projects/RM_Meeting_notes/Great_20170607_1pm",
+		"/C/_Work/Projects/RM_Meeting_notes/Great_20170609_10am",
+		"/C/_Work/Projects/RM_Meeting_notes/Services_20170607_5pm",
+		"/C/_Work/Projects/RM_Meeting_notes/Services_20170614_12pm",
+		"/C/_Work/Projects/RM_Meeting_notes/TMO_20170612_1pm",
+		"/C/Programming/Goo/CS61B/Lab1/Names.java",
+		"/C/Users/TecAce/Downloads/ucberkeley.json",
+		"/C/Users/TecAce/Downloads/YT Channel - UCBerkeley.torrent",
+		"/C/Users/TecAce/Downloads/Computer Science 61B, 001 - Fall 2011/Computer Science 61B - Lecture 1-vyAeu8qOx2g.info.json",
+		"/C/Users/TecAce/Downloads/Computer Science 61B, 001 - Fall 2011/Computer Science 61B - Lecture 1-vyAeu8qOx2g.description",
+		"/C/Users/TecAce/Downloads/Computer Science 61B, 001 - Fall 2011/Computer Science 61B - Lecture 1-vyAeu8qOx2g.annotations.xml",
+		"/C/Programming/Goo/Java/IntroJava/3/Interval.java",
+		"/C/Programming/Goo/Java/introcs/StdStats.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Complex.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Histogram.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Turtle.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Ngon.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Koch.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Spiral.java",
+		"/C/Programming/Goo/Java/IntroJava/3/DrunkenTurtle.java",
+		"/C/Programming/Goo/Java/IntroJava/3/DrunkenTurtles.java",
+		"/C/Programming/Goo/Java/IntroJava/3/ValidDNA.java",
+		"/C/Programming/Goo/Java/IntroJava/3/WatsonCrickComplement.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Charge.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Stopwatch.java",
+		"/C/Programming/Goo/Java/IntroJava/3/StockQuote.java",
+		"/C/_Work/Projects/Glympse/Glympse_Api_Tizen_2.31.139/package.json",
+		"/C/Programming/Goo/Java/IntroJava/3/PotentialGene.java",
+		"/C/Programming/Goo/Java/IntroJava/3/ReverseString.java",
+		"/C/Programming/Goo/Java/IntroJava/3/FlipX.java",
+		"/C/Programming/Goo/Java/IntroJava/3/ColorSeparation.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Split.java",
+		"/C/Users/TecAce/AppData/Local/Temp/7zOCD43F8D9/tizen-manifest.xml",
+		"/C/Users/TecAce/AppData/Local/Temp/7zOCA380568/config.xml",
+		"/C/Users/TecAce/Downloads/Showcase_src_170512/app/src/main/jni/Application.mk",
+		"/C/Users/TecAce/Downloads/Showcase_src_170512/app/build.gradle",
+		"/C/_Work/workspace/Fit/TaylorMadeFit/config.xml",
+		"/C/Users/TecAce/Downloads/Showcase_src_170512/app/src/main/AndroidManifest.xml",
+		"/C/Users/TecAce/Downloads/Showcase_src_170512/app/src/main/java/com/tecace/showcase/preview/NativeImageStorage.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Grayscale.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Scale.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Fade.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Cat.java",
+		"/C/_Work/_Repos/gearhub2.0_client/GearHub/config.xml",
+		"/C/Programming/Python/test.py",
+		"/C/Programming/Python/format_media_list.py",
+		"/C/Programming/Goo/Java/IntroJava/3/AlbersSquares.java",
+		"/C/Programming/Goo/Java/IntroJava/3/Luminance.java",
+		"/C/_Work/_Archive/GoodDepot/20170512/gooddepot/gulpfile.js",
+		"/C/Programming/Goo/Java/IntroJava/2/PotentialGene.java",
+		"/C/Programming/Goo/Java/IntroJava/2/PercolationProbability.java",
+		"/C/Programming/Goo/Java/IntroJava/2/VerticalPercolation.java",
+		"/C/Programming/Goo/Java/IntroJava/2/PercolationDirectedNonrecursive.java",
+		"/C/Programming/Goo/Princeton/1 Union-Find/QuickFindUF.java",
+		"/C/Programming/Goo/Java/IntroJava/2/PercolationPlot.java",
+		"/C/Programming/Goo/Java/IntroJava/2/PercolationVisualizer.java",
+		"/C/Programming/Goo/Java/IntroJava/2/Percolation.java",
+		"/C/Users/TecAce/Desktop/ShowcaseData_170515/ShowcaseData/appdata.json",
+		"/C/_Work/Projects/Showcase/releases/20170518/ShowcaseData_170511_final/ShowcaseData/appdata.json",
+		"/C/_Work/Projects/Showcase/releases/20170511/ShowcaseData_170511_final/ShowcaseData/appdata.json",
+		"/C/Users/TecAce/Desktop/ShowcaseData_170515/ShowcaseData/appdata.org.json",
+		"/C/_Work/Projects/Showcase/releases/20170511/ShowcaseData_170511_final/ShowcaseData/appdata.org.json",
+		"/C/_Work/_Repos/gearhub2.0_client/GearHub/js/main.js",
+		"/C/_Work/_Repos/gearhub2.0_client/GearHub/js/app.js",
+		"/C/Programming/Goo/Java/IntroJava/2/AnimatedHtree.java",
+		"/C/Programming/Goo/Java/IntroJava/2/Euclid.java",
+		"/C/Programming/Goo/Java/IntroJava/2/BottomUpFibonacci.java",
+		"/C/Programming/Goo/Java/IntroJava/2/TopDownFibonacci.java",
+		"/C/Programming/Goo/Java/IntroJava/2/Fibonacci.java",
+		"/C/Programming/Goo/Java/IntroJava/2/Brownian.java",
+		"/C/Programming/Goo/Java/IntroJava/2/LongestCommonSubsequence.java",
+		"/C/Programming/Goo/Java/IntroJava/2/myStdArrayIO.java",
+		"/C/Programming/Goo/Java/IntroJava/2/TowersOfHanoi.java",
+		"/C/Programming/Goo/Java/IntroJava/2/Beckett.java",
+		"/C/Programming/Goo/Java/IntroJava/1/BouncingBallDeluxe.java",
+		"/C/Programming/Goo/Java/IntroJava/2/StdArrayIO.java",
+		"/C/Programming/Goo/Java/IntroJava/2/Matrix.java",
+		"/C/_Work/workspace/Tizen/Costco1/css/style.css",
+		"/C/_Work/workspace/Tizen/GearWarehouse/css/style.css",
+		"/C/Programming/Goo/Java/IntroJava/2/Factorial.java"
+	],
+	"find":
+	{
+		"height": 28.0
+	},
+	"find_in_files":
+	{
+		"height": 117.0,
+		"where_history":
+		[
+			"C:\\_Work\\workspace\\Tizen\\GearHub,C:\\_Work\\workspace\\Tizen\\ghubsvc",
+			"<current file>",
+			"C:\\_Work\\workspace\\Tizen\\",
+			"C:\\_Work\\workspace\\Tizen\\ghubsvc",
+			"C:\\Users\\TecAce\\Downloads\\Showcase_src_170512",
+			"C:\\Programming\\Goo\\Java"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"4G941U4Ayp",
+			"2.0#RwRsBUzqbbuah/1LYjr6cwAKkls=",
+			"1.0#Gn5nvd2cOsSU4Ak+cXAGGwuE1y8",
+			"1.0#Gn5nvd2cOsSU4Ak+cXAGGwuE1y8=",
+			"4G941U4Ayp",
+			"occurrences",
+			"inBetween",
+			"4G941U4Ayp",
+			"4G941U4\n",
+			";\n",
+			"4G941U4Ayp",
+			"CS 61b ",
+			"CS61b",
+			"C61b",
+			"bernoulli",
+			"43.15648",
+			"\t43.15648",
+			"156001",
+			"43.156001",
+			"43.155037",
+			"43.153263",
+			"\t43.153263",
+			"10:20:29",
+			"callback",
+			"^\\d/\\d{2} \\d+:\\d+:\\d+\\t(?!Joseph Park).*\\n",
+			"^\\d/\\d{2} \\d+:\\d+:\\d+\\t(?!Carm Bartley).*(?!/location).*\\n",
+			"^\\d/\\d{2} \\d+:\\d+:\\d+\\t(?!Carm Bartley).*\\n",
+			"^\\d/\\d{2} \\d+:\\d+:\\d+\\t(?!Jeff Yang).*\\n",
+			"4G941U4Ayp",
+			"4G941U4",
+			"^\\d/\\d{2} \\d+:\\d+:\\d+\\t(?!Carm Bartley).*\\n",
+			"^\\d/\\d{2} \\d+:\\d+:\\d+\\t(?!Carm Bartley).*",
+			"(?!^\\d/\\d{2} \\d+:\\d+:\\d+\\tCarm Bartley.*)",
+			"^.*Carm Bartley ",
+			"^.* Carm Bartley ",
+			"^.* Carm Bartley",
+			" native ",
+			"native",
+			"build",
+			"photobucket",
+			"build",
+			"toonstv",
+			"skimble",
+			"yellow",
+			"tecace",
+			"infinity",
+			"build2",
+			"temp"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"4G941U4zzz",
+			"duplicates",
+			"4G941U4zzz",
+			"",
+			"\\b",
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 28.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Java/JavaC.sublime-build",
+	"project": "PixImage.sublime-project",
+	"replace":
+	{
+		"height": 52.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 465.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 490.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 188.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
