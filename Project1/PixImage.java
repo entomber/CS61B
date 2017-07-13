@@ -21,8 +21,9 @@ public class PixImage {
    *  Define any variables associated with a PixImage object here.  These
    *  variables MUST be private.
    */
-
-
+  private short[][][] image;
+  private final int width;
+  private final int height;
 
 
   /**
@@ -34,6 +35,9 @@ public class PixImage {
    */
   public PixImage(int width, int height) {
     // Your solution here.
+    this.width = width;
+    this.height = height;
+    image = new short[width][height][3];
   }
 
   /**
@@ -43,7 +47,7 @@ public class PixImage {
    */
   public int getWidth() {
     // Replace the following line with your solution.
-    return 1;
+    return width;
   }
 
   /**
@@ -53,7 +57,7 @@ public class PixImage {
    */
   public int getHeight() {
     // Replace the following line with your solution.
-    return 1;
+    return height;
   }
 
   /**
@@ -65,7 +69,7 @@ public class PixImage {
    */
   public short getRed(int x, int y) {
     // Replace the following line with your solution.
-    return 0;
+    return image[x][y][0];
   }
 
   /**
@@ -77,7 +81,7 @@ public class PixImage {
    */
   public short getGreen(int x, int y) {
     // Replace the following line with your solution.
-    return 0;
+    return image[x][y][1];
   }
 
   /**
@@ -89,7 +93,7 @@ public class PixImage {
    */
   public short getBlue(int x, int y) {
     // Replace the following line with your solution.
-    return 0;
+    return image[x][y][2];
   }
 
   /**
@@ -107,6 +111,14 @@ public class PixImage {
    */
   public void setPixel(int x, int y, short red, short green, short blue) {
     // Your solution here.
+    if (x >= 0 && x <= width && y >= 0 && y <= width &&
+        red >= 0    && red <= 255 &&
+        green >= 0  && green <= 255 &&
+        blue >= 0   && blue <= 255) {
+      image[x][y][0] = red;
+      image[x][y][1] = green;
+      image[x][y][2] = blue;
+    }
   }
 
   /**
@@ -154,8 +166,137 @@ public class PixImage {
    */
   public PixImage boxBlur(int numIterations) {
     // Replace the following line with your solution.
-    return this;
+    if (numIterations <= 0) {
+      return this;
+    }
+    PixImage blurred = new PixImage(width, height);
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        short newRed = 0;
+        short newGreen = 0;
+        short newBlue = 0;
+
+        // TODO: 1. use x and y offset variables to reduce code
+        // 2. check if corner, border, or interior at beginning to reduce code
+
+        if (x == 0 && y == 0) { 
+        // top-left corner
+          newRed +=   getRed(x,y)   + getRed(x+1,y) + 
+                      getRed(x,y+1) + getRed(x+1,y+1);
+          newGreen += getGreen(x,y)   + getGreen(x+1,y) + 
+                      getGreen(x,y+1) + getGreen(x+1,y+1);
+          newBlue +=  getBlue(x,y)    + getBlue(x+1,y) +
+                      getBlue(x,y+1)  + getBlue(x+1,y+1);
+          newRed /= 4;
+          newGreen /= 4;
+          newBlue /= 4;            
+        } else if (x == 0 && y == height-1) { 
+        // bottom-left corner
+          newRed +=   getRed(x,y-1) + getRed(x+1,y-1) +
+                      getRed(x,y)   + getRed(x+1,y);
+          newGreen += getGreen(x,y-1) + getGreen(x+1,y-1) +
+                      getGreen(x,y)   + getGreen(x+1,y);
+          newBlue +=  getBlue(x,y-1) + getBlue(x+1,y-1) +
+                      getBlue(x,y)   + getBlue(x+1,y);
+          newRed /= 4;
+          newGreen /= 4;
+          newBlue /= 4;
+        } else if (x == width-1 && y == 0) { 
+        // top-right corner
+          newRed +=   getRed(x-1,y)   + getRed(x,y) + 
+                      getRed(x-1,y+1) + getRed(x,y+1);
+          newGreen += getGreen(x-1,y)   + getGreen(x,y) + 
+                      getGreen(x-1,y+1) + getGreen(x,y+1);
+          newBlue +=  getBlue(x-1,y)    + getBlue(x,y) +
+                      getBlue(x-1,y+1)  + getBlue(x,y+1);
+          newRed /= 4;
+          newGreen /= 4;
+          newBlue /= 4;            
+        } else if (x == width-1 && y == height-1) { 
+        // bottom-right corner
+          newRed +=   getRed(x-1,y-1) + getRed(x,y-1) +
+                      getRed(x-1,y)   + getRed(x,y);
+          newGreen += getGreen(x-1,y-1) + getGreen(x,y-1) +
+                      getGreen(x-1,y)   + getGreen(x,y);
+          newBlue +=  getBlue(x-1,y-1) + getBlue(x,y-1) +
+                      getBlue(x-1,y)   + getBlue(x,y);
+          newRed /= 4;
+          newGreen /= 4;
+          newBlue /= 4;
+        } else if (x == 0) { 
+        // left border
+          newRed +=   getRed(x,y-1) + getRed(x+1,y-1) +
+                      getRed(x,y)   + getRed(x+1,y)   +
+                      getRed(x,y+1) + getRed(x+1,y+1);
+          newGreen += getGreen(x,y-1) + getGreen(x+1,y-1) +
+                      getGreen(x,y)   + getGreen(x+1,y)   +
+                      getGreen(x,y+1) + getGreen(x+1,y+1);
+          newBlue +=  getBlue(x,y-1) + getBlue(x+1,y-1) +
+                      getBlue(x,y)   + getBlue(x+1,y)   +
+                      getBlue(x,y+1) + getBlue(x+1,y+1);
+          newRed /= 6;
+          newGreen /= 6;
+          newBlue /= 6;
+        } else if (x == width-1) { 
+        // right border
+          newRed +=   getRed(x-1,y-1) + getRed(x,y-1) +
+                      getRed(x-1,y)   + getRed(x,y)   +
+                      getRed(x-1,y+1) + getRed(x,y+1);
+          newGreen += getGreen(x-1,y-1) + getGreen(x,y-1) +
+                      getGreen(x-1,y)   + getGreen(x,y)   +
+                      getGreen(x-1,y+1) + getGreen(x,y+1);
+          newBlue +=  getBlue(x-1,y-1) + getBlue(x,y-1) +
+                      getBlue(x-1,y)   + getBlue(x,y)   +
+                      getBlue(x-1,y+1) + getBlue(x,y+1);
+          newRed /= 6;
+          newGreen /= 6;
+          newBlue /= 6;
+        } else if (y == 0) { 
+        // top border
+          newRed +=   getRed(x-1,y)   + getRed(x,y)   + getRed(x+1,y) +
+                      getRed(x-1,y+1) + getRed(x,y+1) + getRed(x+1,y+1);
+          newGreen += getGreen(x-1,y)   + getGreen(x,y)   + getGreen(x+1,y) +
+                      getGreen(x-1,y+1) + getGreen(x,y+1) + getGreen(x+1,y+1);
+          newBlue +=  getBlue(x-1,y)    + getBlue(x,y)    + getBlue(x+1,y) +
+                      getBlue(x-1,y+1)  + getBlue(x,y+1)  + getBlue(x+1,y+1);
+          newRed /= 6;
+          newGreen /= 6;
+          newBlue /= 6;
+        } else if (y == height-1) { 
+        // bottom border
+          newRed +=   getRed(x-1,y-1) + getRed(x,y-1) + getRed(x+1,y-1) +
+                      getRed(x-1,y)   + getRed(x,y)   + getRed(x+1,y);
+          newGreen += getGreen(x-1,y-1) + getGreen(x,y-1) + getGreen(x+1,y-1) +
+                      getGreen(x-1,y)   + getGreen(x,y)   + getGreen(x+1,y);
+          newBlue +=  getBlue(x-1,y-1) + getBlue(x,y-1) + getBlue(x+1,y-1) +
+                      getBlue(x-1,y)   + getBlue(x,y)   + getBlue(x+1,y);
+          newRed /= 6;
+          newGreen /= 6;
+          newBlue /= 6;
+        } else {  
+        // non-border
+          newRed +=   getRed(x-1,y-1) + getRed(x,y-1) + getRed(x+1,y-1) +
+                      getRed(x-1,y)   + getRed(x,y)   + getRed(x+1,y)   + 
+                      getRed(x-1,y+1) + getRed(x,y+1) + getRed(x+1,y+1);
+          newGreen += getGreen(x-1,y-1) + getGreen(x,y-1) + getGreen(x+1,y-1) +
+                      getGreen(x-1,y)   + getGreen(x,y)   + getGreen(x+1,y)   +
+                      getGreen(x-1,y+1) + getGreen(x,y+1) + getGreen(x+1,y+1);
+          newBlue +=  getBlue(x-1,y-1) + getBlue(x,y-1) + getBlue(x+1,y-1) +
+                      getBlue(x-1,y)   + getBlue(x,y)   + getBlue(x+1,y)   +
+                      getBlue(x-1,y+1) + getBlue(x,y+1) + getBlue(x+1,y+1);
+          newRed /= 9;
+          newGreen /= 9;
+          newBlue /= 9;
+        }
+        blurred.setPixel(x, y, newRed, newGreen, newBlue);
+      }
+    }
+    numIterations--;
+    return blurred.boxBlur(numIterations);
   }
+
+
+
 
   /**
    * mag2gray() maps an energy (squared vector magnitude) in the range
@@ -199,11 +340,137 @@ public class PixImage {
    */
   public PixImage sobelEdges() {
     // Replace the following line with your solution.
-    return this;
-    // Don't forget to use the method mag2gray() above to convert energies to
-    // pixel intensities.
+
+    short[][] xkernel = { {1, 0, -1}, {2, 0, -2}, {1, 0, -1} };
+    short[][] ykernel = { {1, 2, 1}, {0, 0, 0}, {-1, -2, -1} };
+    // gradients gx and gy for each color
+    short gxRed = 0;
+    short gxGreen = 0;
+    short gxBlue = 0;
+    short gyRed = 0;
+    short gyGreen = 0;
+    short gyBlue = 0;
+    int energy = 0;   // energy of a pixel (sum of RGB gradients squared)
+    short gray = 0;   // pixel energy converted to grayscale intensity
+    PixImage edges = new PixImage(width, height);
+    /* For each point, do:
+        1. get surrounding pixels
+        2. calculate gx and gy for each color (6 total gradients)
+        3. compute energy exactly (cast as long/int before) */
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        short[][][] ref = reflect(x, y);
+        gxRed   = calculateGradient(xkernel, ref, 0);
+        gxGreen = calculateGradient(xkernel, ref, 1);
+        gxBlue  = calculateGradient(xkernel, ref, 2);
+        gyRed   = calculateGradient(ykernel, ref, 0);
+        gyGreen = calculateGradient(ykernel, ref, 1);
+        gyBlue  = calculateGradient(ykernel, ref, 2);
+        energy =  (int) gxRed * (int) gxRed + (int) gyRed * (int) gyRed + 
+                  (int) gxGreen * (int) gxGreen + (int) gyGreen * (int) gyGreen + 
+                  (int) gxBlue * (int) gxBlue + (int) gyBlue* (int) gyBlue;
+        gray = mag2gray(energy);
+        edges.setPixel(x, y, gray, gray, gray);
+      }
+    }
+    return edges;
   }
 
+  // returns surrounding pixels around given x, y. reflects border pixels
+  private short[][][] reflect(int x, int y) {
+    short a[][][] = new short[3][3][3];
+    int i = 0;
+    int j = 0;
+    int iStop = 2;
+    int jStop = 2;
+
+    // set start point for i, and stop points for i and i
+    if (x == 0) {
+      i = 1;
+    } else if (x == width-1) {
+      iStop = 1;
+    }
+    if (y == height-1) {
+      jStop = 1;
+    }
+
+    // copies non-border pixels surrounding x,y
+    for ( ; i <= iStop; i++) {
+      if (y == 0) {
+        j = 1;
+      } else {
+        j = 0;
+      }
+      for ( ; j <= jStop; j++) {
+        a[i][j] = image[x-1+i][y-1+j];
+      }
+    }
+
+    // reflects pixel across border
+    if (x == 0 && y == 0) {
+    // top-left corner
+      a[0][0] = image[x][y];
+      a[1][0] = image[x][y];
+      a[0][1] = image[x][y];
+      a[2][0] = image[x+1][y];
+      a[0][2] = image[x][y+1];
+    } else if (x == 0 && y == height-1) {
+    // bottom-left corner
+      a[0][2] = image[x][y];
+      a[0][1] = image[x][y];
+      a[1][2] = image[x][y];
+      a[0][0] = image[x][y-1];
+      a[2][2] = image[x+1][y];
+    } else if (x == width-1 && y == 0) {
+    // top-right corner
+      a[2][0] = image[x][y];
+      a[1][0] = image[x][y];
+      a[2][1] = image[x][y];
+      a[0][0] = image[x-1][y];
+      a[2][2] = image[x][y+1];
+    } else if (x == width-1 && y == height-1) {
+    // bottom-right corner
+      a[2][2] = image[x][y];
+      a[1][2] = image[x][y];
+      a[2][1] = image[x][y];
+      a[0][2] = image[x-1][y];
+      a[2][0] = image[x][y-1];
+    } else if (x == 0) {
+    // left border
+      a[0][0] = image[x][y-1];
+      a[0][1] = image[x][y];
+      a[0][2] = image[x][y+1];
+    } else if (x == width-1) {
+    // right border
+      a[2][0] = image[x][y-1];
+      a[2][1] = image[x][y];
+      a[2][2] = image[x][y+1];
+    } else if (y == 0) {
+    // top border
+      a[0][0] = image[x-1][y];
+      a[1][0] = image[x][y];
+      a[2][0] = image[x+1][y];
+    } else if (y == height-1) {
+    // bottom border
+      a[0][2] = image[x-1][y];
+      a[1][2] = image[x][y];
+      a[2][2] = image[x+1][y];
+    }
+    return a;
+  }
+
+  // calculates the gradient given:
+  // 1. the kernel, 2. 3x3 neighbors array, and 3. color (0 = r, 1 = g, 2 = b)
+  private short calculateGradient(short[][] kernel, short[][][] neighbors, int color) {
+    short gradient = 0;
+    int size = kernel.length;
+    for (int x = 0; x < size; x++) {
+      for (int y = 0; y < size; y++) {
+        gradient += kernel[size-1-x][size-1-y] * neighbors[x][y][color];
+      }
+    }
+    return gradient;
+  }
 
   /**
    * TEST CODE:  YOU DO NOT NEED TO FILL IN ANY METHODS BELOW THIS POINT.
@@ -337,5 +604,47 @@ public class PixImage {
            array2PixImage(new int[][] { { 122, 143, 74 },
                                         { 74, 143, 122 } })),
            "Incorrect Sobel:\n" + image2.sobelEdges());
+
+    // additional test cases
+    // testBoxBlur();
+    // testReflect();
   }
+
+  private static void testBoxBlur() {
+    PixImage image1 = array2PixImage(new int[][] { { 0, 10, 240 },
+                                                   { 30, 120, 250 },
+                                                   { 80, 250, 255 } });
+    System.out.println("Testing blurring on a 3x3 image.");
+    doTest(image1.boxBlur(0).equals(image1),
+           "Incorrect box blur (0 rep):\n" + image1.boxBlur(0));
+  }
+
+  private static void testReflect() {
+    PixImage image = array2PixImage(new int[][] { { 0, 10, 240 },
+                                                  { 30, 120, 250 },
+                                                  { 80, 250, 255 } });
+    System.out.println("Testing reflect on a 3x3 image.");
+    // prints the intensity of grayscale 3x3 image
+    for (int i = 0; i < image.getWidth(); i++) {
+      for (int j = 0; j < image.getHeight(); j++) {
+        System.out.print(image.getRed(i, j) + "\t");
+      }
+      System.out.println();
+    }
+    // iterate through all pixels in 3x3 image
+    for (int row = 0; row < image.getHeight(); row++) {
+      for (int col = 0; col < image.getWidth(); col++) {
+        short[][][] reflected = image.reflect(row, col);
+        System.out.println("\nx: " + col + ", y: " + row);
+        // print out surrounding pixels around current (center) pixel
+        for (int i = 0; i < reflected.length; i++) {
+          for (int j = 0; j < reflected[0].length; j++) {
+            System.out.print(reflected[i][j][0] + "\t");
+          }
+          System.out.println("");
+        }
+      }
+    }
+  }
+
 }
