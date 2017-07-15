@@ -132,7 +132,14 @@ public class PixImage {
    */
   public String toString() {
     // Replace the following line with your solution.
-    return "";
+    String result = "PixImage - width: " + width + ", height: " + height + "\n";
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        result += (int) ((getRed(x,y) + getGreen(x,y) + getBlue(x,y)) * (1/3.0)) + "\t";
+      }
+      result += "\n";
+    }
+    return result;
   }
 
   /**
@@ -558,7 +565,7 @@ public class PixImage {
                                                    { 80, 250, 255 } });
     System.out.println("Testing getWidth/getHeight on a 3x3 image.  " +
                        "Input image:");
-    System.out.print(image1);
+    System.out.println(image1);
     doTest(image1.getWidth() == 3 && image1.getHeight() == 3,
            "Incorrect image width and height.");
 
@@ -589,7 +596,7 @@ public class PixImage {
                                                    { 0, 0, 100 } });
     System.out.println("Testing getWidth/getHeight on a 2x3 image.  " +
                        "Input image:");
-    System.out.print(image2);
+    System.out.println(image2);
     doTest(image2.getWidth() == 2 && image2.getHeight() == 3,
            "Incorrect image width and height.");
 
