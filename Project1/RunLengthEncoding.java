@@ -25,10 +25,6 @@ import java.util.Iterator;
 
 public class RunLengthEncoding implements Iterable {
 
-  /**
-   *  Define any variables associated with a RunLengthEncoding object here.
-   *  These variables MUST be private.
-   */
   private int width;
   private int height;
   private DList runs;
@@ -49,8 +45,6 @@ public class RunLengthEncoding implements Iterable {
    */
 
   public RunLengthEncoding(int width, int height) {
-    // Your solution here.
-
     this.width = width;
     this.height = height;
     int[] run = {width*height, 0, 0, 0};
@@ -80,7 +74,6 @@ public class RunLengthEncoding implements Iterable {
 
   public RunLengthEncoding(int width, int height, int[] red, int[] green,
                            int[] blue, int[] runLengths) {
-    // Your solution here.
 
     int sum = 0;  // sum of all elements of runLengths
     this.width = width;
@@ -124,7 +117,6 @@ public class RunLengthEncoding implements Iterable {
    */
 
   public int getWidth() {
-    // Replace the following line with your solution.
     return width;
   }
 
@@ -135,7 +127,6 @@ public class RunLengthEncoding implements Iterable {
    *  @return the height of the image that this run-length encoding represents.
    */
   public int getHeight() {
-    // Replace the following line with your solution.
     return height;
   }
 
@@ -147,10 +138,7 @@ public class RunLengthEncoding implements Iterable {
    *  RunLengthEncoding.
    */
   public RunIterator iterator() {
-    // Replace the following line with your solution.
     return new RunIterator(runs);
-    // You'll want to construct a new RunIterator, but first you'll need to
-    // write a constructor in the RunIterator class.
   }
 
   /**
@@ -160,7 +148,6 @@ public class RunLengthEncoding implements Iterable {
    *  @return the PixImage that this RunLengthEncoding encodes.
    */
   public PixImage toPixImage() {
-    // Replace the following line with your solution.
     PixImage image = new PixImage(width, height);
     RunIterator it = iterator();
     int x = 0;
@@ -194,12 +181,12 @@ public class RunLengthEncoding implements Iterable {
    *  @return a String representation of this RunLengthEncoding.
    */
   public String toString() {
-    // Replace the following line with your solution.
     RunIterator it = iterator();
-    String result = "[  ";
+    String result = "RLE - [  ";
     while (it.hasNext()) {
       int[] run = it.next();
-      result += run[0] + "," + run[1] + "," + run[2] + "," + run[3] + "  ";
+      // result += run[1] + "," + run[2] + "," + run[3] + "," + run[0] + "  ";
+      result += run[1] + "," + run[0] + "  ";
     }
     return result + "]";
   }
@@ -219,8 +206,6 @@ public class RunLengthEncoding implements Iterable {
    *  @param image is the PixImage to run-length encode.
    */
   public RunLengthEncoding(PixImage image) {
-    // Your solution here, but you should probably leave the following line
-    // at the end.
     width = image.getWidth();
     height = image.getHeight();
     runs = new DList();
@@ -272,7 +257,6 @@ public class RunLengthEncoding implements Iterable {
    *  all run lengths does not equal the number of pixels in the image.
    */
   public void check() {
-    // Your solution here.
     RunIterator it = iterator();
     int sum = 0;
     short prevR = Short.MIN_VALUE;
@@ -317,8 +301,155 @@ public class RunLengthEncoding implements Iterable {
    *  @param blue the new blue intensity to store at coordinate (x, y).
    */
   public void setPixel(int x, int y, short red, short green, short blue) {
-    // Your solution here, but you should probably leave the following line
-    //   at the end.
+
+    if (x < 0 || x > width-1 || y < 0 || y > height-1) {
+      System.err.println("x and/or y invalid");
+      return;
+    }
+    // find the run pixel is in by comparing its absoulte position to
+    // sum of run lengths encountered so far
+    int pixelPosition = x + (y * width) + 1;
+    int sumRunLength = 0;
+
+    int[] newRun = { 1, red, green, blue }; // new run to insert
+    DListNode run = runs.head.next; // run starts at first run after sentinel
+
+    while (sumRunLength + run.item[0] < pixelPosition) {
+      sumRunLength += run.item[0];
+      run = run.next;
+    }
+    // if intensity is same for existing pixel and new pixel, do nothing
+    if (run.item[1] == red && run.item[2] == green && run.item[3] == blue) {
+      return; 
+    }
+
+    // pixel is first pixel of run or single pixel run
+    if (sumRunLength + 1 == pixelPosition) {
+      // not on first run
+      if (run.prev != runs.head) {
+        if (run.item[0] == 1) {
+          // pixel matches adjacent runs pixels
+          if (run.next != runs.head &&
+              run.prev.item[1] == red   && run.next.item[1] == red &&
+              run.prev.item[2] == green && run.next.item[2] == green &&
+              run.prev.item[3] == blue  && run.next.item[3] == blue) {
+            // combine runs into previous run, link from previous run
+            // to run after next run
+            run.prev.item[0] += 1 + run.next.item[0];
+            run.prev.next = run.next.next;
+            run.next.next.prev = run.prev;
+          }
+          // pixel matches previous run's pixel
+          else if (run.prev.item[1] == red && run.prev.item[2] == green &&
+                   run.prev.item[3] == blue) {
+            run.prev.item[0]++;
+            // remove the run
+            run.prev.next = run.next;
+            run.next.prev = run.prev;
+          }
+          // pixel matches next run's pixel
+          else if (run.next != runs.head && run.next.item[1] == red && 
+                   run.next.item[2] == green && run.next.item[3] == blue) {
+            run.next.item[0]++;
+            // remove the run
+            run.prev.next = run.next;
+            run.next.prev = run.prev;
+          }
+          // pixel matches neither run
+          else {
+            run.item[1] = red;
+            run.item[2] = green;
+            run.item[3] = blue;
+          }
+        }
+        // run length > 1, matches previous run
+        else if (run.prev.item[1] == red && run.prev.item[2] == green &&
+                 run.prev.item[3] == blue) {
+          run.prev.item[0]++;
+          run.item[0]--;
+        }
+        // run length > 1, previous run doesn't match
+        else {
+          DListNode before = new DListNode(newRun);
+          run.item[0]--;
+          // link new node
+          before.prev = run.prev;
+          before.next = run;
+          run.prev.next = before;
+          run.prev = before;
+        }
+      }
+      // on first run
+      else {
+        if (run.item[0] == 1) {
+          // check if pixel matches next run's pixels
+          if (run.next.item[1] == red && run.next.item[2] == green &&
+              run.next.item[3] == blue) {
+            run.next.item[0]++;
+            // remove the run
+            run.prev.next = run.next;
+            run.next.prev = run.prev;
+          }
+          // pixel doesn't match
+          else {
+            run.item[1] = red;
+            run.item[2] = green;
+            run.item[3] = blue;
+          }
+        }
+        // run length > 1, insert new run before
+        else {
+          DListNode before = new DListNode(newRun);
+          run.item[0]--;
+          // link new node
+          before.prev = run.prev;
+          before.next = run;
+          run.prev.next = before;
+          run.prev = before;
+        }
+      }
+    }
+    // pixel is last pixel of run (run length > 1)
+    else if (sumRunLength + run.item[0] == pixelPosition) {
+      // not on last run, and pixel matches next run's pixels
+      if (run.next != runs.head && run.next.item[1] == red &&
+          run.next.item[2] == green && run.next.item[3] == blue) {
+          run.next.item[0]++;
+          run.item[0]--;
+        }
+      // on the last run or pixel does not match next run's pixels,
+      // insert new run after
+      else {
+        DListNode after = new DListNode(newRun);
+        run.item[0]--;
+        // link new node
+        after.prev = run;
+        after.next = run.next;
+        run.next.prev = after;
+        run.next = after;
+        }
+    }
+    // pixel somewhere in middle
+    else {
+      // nodes split into 3: start, mid, end
+      DListNode next = run.next;    // node after the original node
+      int runLength = run.item[0];  // length of current run
+      int startRunLength = pixelPosition - sumRunLength - 1;
+      int endRunLength = runLength - startRunLength - 1;
+      int[] endRun = { endRunLength, run.item[1], run.item[2], run.item[3] };
+
+      DListNode start = run;
+      start.item[0] = startRunLength;
+      DListNode mid = new DListNode(newRun);
+      DListNode end = new DListNode(endRun);
+
+      // link the nodes
+      start.next = mid;
+      mid.prev = start;
+      mid.next = end;
+      end.prev = mid;
+      end.next = next;
+    }
     check();
   }
 
@@ -389,8 +520,6 @@ public class RunLengthEncoding implements Iterable {
    * main() runs a series of tests of the run-length encoding code.
    */
   public static void main(String[] args) {
-    // testSimpleConstructors();
-
     // Be forwarned that when you write arrays directly in Java as below,
     // each "row" of text is a column of your image--the numbers get
     // transposed.
@@ -402,7 +531,6 @@ public class RunLengthEncoding implements Iterable {
                        "on a 3x3 image.  Input image:");
     System.out.print(image1);
     RunLengthEncoding rle1 = new RunLengthEncoding(image1);
-    System.out.println(rle1);
     rle1.check();
     System.out.println("Testing getWidth/getHeight on a 3x3 encoding.");
     doTest(rle1.getWidth() == 3 && rle1.getHeight() == 3,
@@ -422,7 +550,7 @@ public class RunLengthEncoding implements Iterable {
                                                     { 2, 5, 8 } })),
            */
            "Setting RLE1[0][0] = 42 fails.");
-
+    
     System.out.println("Testing setPixel() on a 3x3 encoding.");
     setAndCheckRLE(rle1, 1, 0, 42);
     image1.setPixel(1, 0, (short) 42, (short) 42, (short) 42);
@@ -488,7 +616,6 @@ public class RunLengthEncoding implements Iterable {
     image2.setPixel(2, 0, (short) 2, (short) 2, (short) 2);
     doTest(rle2.toPixImage().equals(image2),
            "Setting RLE2[2][0] = 2 fails.");
-
 
     PixImage image3 = array2PixImage(new int[][] { { 0, 5 },
                                                    { 1, 6 },
@@ -562,6 +689,10 @@ public class RunLengthEncoding implements Iterable {
     image4.setPixel(1, 0, (short) 1, (short) 1, (short) 1);
     doTest(rle4.toPixImage().equals(image4),
            "Setting RLE4[1][0] = 1 fails.");
+
+    // additional cases
+    // testSimpleConstructors();
+    // testSetPixel();
   }
 
   private static void testSimpleConstructors() {
@@ -588,5 +719,64 @@ public class RunLengthEncoding implements Iterable {
     System.out.println("RLE:\t" + rle);
     PixImage image1 = rle.toPixImage();
     System.out.println(image1);
+  }
+
+  private static void testSetPixel() {
+    int[][] a = { { 7,  88, 0 },
+                  { 7,  88, 0 },
+                  { 7,  88, 0 },
+                  { 88, 88, 0 } };
+    int[][] b = { { 0, 3, 6 },
+                  { 1, 4, 7 },
+                  { 2, 5, 8 } };
+    int[][] c = { { 2, 3, 5 },
+                  { 2, 4, 5 },
+                  { 3, 4, 6 } };
+    int[][] d = { { 0, 5 },
+                  { 1, 6 },
+                  { 2, 7 },
+                  { 3, 8 },
+                  { 4, 9 } };
+    int[][] e = { { 0, 3 },
+                  { 1, 4 },
+                  { 2, 5 } };
+    testSetPixel(a);
+    testSetPixel(b);
+    testSetPixel(c);
+    testSetPixel(d);
+    testSetPixel(e);
+  }
+
+  private static void testSetPixel(int[][] a) {
+    // Be forwarned that when you write arrays directly in Java as below,
+    // each "row" of text is a column of your image--the numbers get
+    // transposed.
+    PixImage originalImage = array2PixImage(a);
+    int errorCount = 0;
+    for (int y = 0; y < originalImage.getHeight(); y++) {
+      for (int x = 0; x < originalImage.getWidth(); x++) {
+        PixImage image = array2PixImage(a);
+        RunLengthEncoding rle = new RunLengthEncoding(originalImage);
+
+        rle.setPixel(x,y, (short) 255, (short) 255, (short) 255);
+        image.setPixel(x,y, (short) 255, (short) 255, (short) 255);
+
+        if (!image.equals(rle.toPixImage())) {
+          errorCount++;
+          System.out.println("Error #" + errorCount);
+
+          System.out.print("*** ORIGINAL IMAGE ***\n" + originalImage);
+          System.out.println("*** ORIGINAL RLE ***\n" + rle + "\n");
+
+          System.out.println("x: " + x + ", y: " + y);
+          System.out.println("*** NEW RLE ***\n" + rle);
+          System.out.println("*** NEW IMAGE ***\n" + rle.toPixImage());
+
+          System.out.print("*** EXPECTED IMAGE ***\n" + image);
+          System.out.println("*** EXPECTED RLE ***\n" + new RunLengthEncoding(image));
+        }
+        System.out.println(new RunLengthEncoding(image));
+      }
+    }
   }
 }

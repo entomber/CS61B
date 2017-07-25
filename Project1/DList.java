@@ -48,33 +48,6 @@ public class DList {
 	}
 
 	/**
-	 *	DList() constructor for a two-node DList.
-	 */
-/*	public DList(int val1, int num1, int val2, int num2) {
-		head = new DListNode(Integer.MIN_VALUE);
-		head.next = new DListNode(val1, num1);
-		head.prev = new DListNode(val2, num2);
-		head.next.prev = head;
-		head.next.next = head.prev;
-		head.prev.next = head;
-		head.prev.prev = head.next;
-		size = 2;
-	}*/
-
-	/**
-	 *	insertFront() inserts an item at the front of a DList.
-	 */
-	public void insertFront(int i) {
-	}
-
-	/**
-	 *	removeFront() removes the first item (and first non-sentinel node) from
-	 *	a DList.  If the list is empty, do nothing.
-	 */
-	public void removeFront() {
-	}
-
-	/**
 	 *	insertBack() inserts an item at the back of a DList.
 	 */
 	public void insertBack(int[] i) {
