@@ -221,6 +221,48 @@ public class RunLengthEncoding implements Iterable {
   public RunLengthEncoding(PixImage image) {
     // Your solution here, but you should probably leave the following line
     // at the end.
+    width = image.getWidth();
+    height = image.getHeight();
+    runs = new DList();
+
+    int runLength = 0;  // length of current run
+    int startX = 0; // start of run x coord
+    int startY = 0; // start of run y coord
+
+    /*  Loop through entire PixImage:
+        1. check if current pixel matches pixel from start of current run
+        2a. if true, increment run
+        2b. else, create a new run, insert to list, and set runLength, startX, startY */    
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        if (image.getRed(x, y) == image.getRed(startX, startY)) {
+          runLength += 1;
+        } else {  // run ended
+          int run[] = { runLength,
+                        image.getRed(startX, startY),
+                        image.getGreen(startX, startY),
+                        image.getBlue(startX, startY) };
+          runs.insertBack(run);
+          runLength = 1;
+          startX = x;
+          startY = y;
+        }
+      }
+    }
+    // insert the last run after loop ends
+    if (runLength > 1) {  // more than 1 pixel run when exiting loop
+      int[] run = { runLength, 
+                    image.getRed(startX, startY), 
+                    image.getGreen(startX, startY), 
+                    image.getBlue(startX, startY) };
+      runs.insertBack(run);
+    } else {  // single run of last pixel
+      int[] run = { runLength,
+                    image.getRed(width-1, height-1),
+                    image.getGreen(width-1, height-1),
+                    image.getBlue(width-1, height-1) };
+      runs.insertBack(run);
+    }
     check();
   }
 
@@ -347,7 +389,7 @@ public class RunLengthEncoding implements Iterable {
    * main() runs a series of tests of the run-length encoding code.
    */
   public static void main(String[] args) {
-    testSimpleConstructors();
+    // testSimpleConstructors();
 
     // Be forwarned that when you write arrays directly in Java as below,
     // each "row" of text is a column of your image--the numbers get
@@ -360,6 +402,7 @@ public class RunLengthEncoding implements Iterable {
                        "on a 3x3 image.  Input image:");
     System.out.print(image1);
     RunLengthEncoding rle1 = new RunLengthEncoding(image1);
+    System.out.println(rle1);
     rle1.check();
     System.out.println("Testing getWidth/getHeight on a 3x3 encoding.");
     doTest(rle1.getWidth() == 3 && rle1.getHeight() == 3,
