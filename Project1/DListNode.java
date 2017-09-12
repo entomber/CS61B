@@ -1,5 +1,7 @@
 /* DListNode.java */
 
+// package list;
+
 /**
  *	A DListNode is a node in a DList (doubly-linked list).
  */
@@ -12,8 +14,8 @@ public class DListNode {
 	 *	next references the next node in the DList.
 	 */
 	public int[] item;
-	public DListNode prev;
-	public DListNode next;
+	protected DListNode prev;
+	protected DListNode next;
 
 	/**
 	 *	DListNode constructor.
@@ -24,8 +26,15 @@ public class DListNode {
 		next = null;
 	}
 
-	DListNode(int[] i) {
-		this();
+	/**
+	 *	DListNode() constructor
+	 *	@param i the item to store in the node.
+	 *	@param p the node previous to this node.
+	 *	@param n the node following this node.
+	 */
+	DListNode(int[] i, DListNode p, DListNode n) {
 		item = i;
+		prev = p;
+		next = n;
 	}
 }
