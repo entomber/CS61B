@@ -1,13 +1,13 @@
                                      GRADER
 
-Name of student running submit:
-Login of student running submit:
+Name of student running submit: entomber
+Login of student running submit: N/A
 
-Second team member's name:
-Second team member's login:
+Second team member's name: N/A
+Second team member's login: N/A
 
-Third team member's name (if any):
-Third team member's login:
+Third team member's name (if any): N/A
+Third team member's login: N/A
 
 IMPORTANT:  Once you've submitted Project 2 once, the same team member should
 submit always.  If a different teammate must submit, inform cs61b@cory.eecs of
@@ -22,7 +22,7 @@ Does your program compile without errors?
 
 
 Have you tested your program on the 61B lab machines?
-
+N/A
 
 Did you successfully implement game tree search?  Did you successfully
 implement alpha-beta pruning?  Are there any limitations on it?  What is the
@@ -62,3 +62,134 @@ You will probably need to change some of your design decisions as you go; be
 sure to modify this file to reflect these changes before you submit your
 project.  Your design of classes and interfaces will be worth 10% of your
 grade.
+
+
+BEFORE
+
+Classes:
+1. Network
+2. NetworkGame
+3. GameBoard
+4. Player
+  a. MachinePlayer
+  b. HumanPlayer
+  c. RandomPlayer
+5. Move
+6. List
+7. GameTreeSearch
+8. EvaluationFunction
+
+
+Modules used by MachinePlayer:
+1. Determine whether a move is valid (class: GameBoard)
+2. Generate a list of all valid moves (class: GameBoard)
+3. Find chips (of same color) that form connections with a chip (class: GameBoard)
+4. List to store valid moves, and all chips that form connection with a chip (class: List)
+5. Determine whether game board contains any networks for a given player (class: GameBoard)
+6. Compute an evaluation function for a board (class: EvaluationFunction)
+7. Perform minimax tree search (class: GameTreeSearch)
+
+
+Module interface:
+1. Determine whether a move is valid (class: GameBoard)
+/**
+ *  isValidMove() determines whether a Move "m" is valid for player "side".
+ *  A full description of what constitutes a valid move appears in the
+ *  project "README" file.
+ *
+ *  @param side is MachinePlayer.COMPUTER or MachinePlayer.OPPONENT
+ *  @param m is the move player "side" wants to make
+ *  @return true if Move "m" is valid for player "side", false otherwise.
+ **/
+protected boolean isValidMove(int side, Move m)
+
+
+2. Generate a list of all valid moves (class: GameBoard)
+/**
+ *  getValidMoves() generates a List of all valid moves for player "side".
+ *  A full description of what constitutes a valid move appears in the
+ *  project "README" file.
+ *
+ *  @param side is MachinePlayer.COMPUTER or MachinePlayer.OPPONENT
+ *  @return a List of all valid moves for player "side".
+ **/
+public List getValidMoves(int side)
+
+
+3. Find chips (of same color) that form connections with a chip (class: GameBoard)
+/**
+ *  getConnections() generates a List of chips (prior Moves) that form a 
+ *  connection with the current chip (current Move).
+ *
+ *  @param side is MachinePlayer.COMPUTER or MachinePlayer.OPPONENT
+ *  @param m is the move player "side" wants to make
+ *  @return a List of all prior moves that form a connection with Move "m".
+ **/
+protected List getConnections(int side, Move m)
+
+
+4. List to store valid moves, and all chips that form connection with a chip (class: List)
+
+TODO
+
+5. Determine whether game board contains any networks for a given player (class: GameBoard)
+
+/**
+ *  hasValidNetwork() determines whether "this" GameBoard has a valid network
+ *  for player "side".  (Does not check whether the opponent has a network.)
+ *  A full description of what constitutes a valid network appears in the
+ *  project "README" file.
+ *
+ *  Unusual conditions:
+ *    If side is neither MachinePlayer.COMPUTER nor MachinePlayer.OPPONENT,
+ *      returns false.
+ *    If GameBoard squares contain illegal values, the behavior of this
+ *      method is undefined (i.e., don't expect any reasonable behavior).
+ *
+ *  @param side is MachinePlayer.COMPUTER or MachinePlayer.OPPONENT
+ *  @return true if player "side" has a winning network in "this" GameBoard,
+ *    false otherwise.
+ **/
+protected boolean hasValidNetwork(int side)
+
+
+6. Compute an evaluation function for a board (class: Evaluation)
+
+/**
+ *  evaluate() assigns a score to a Gameboard "board" for a MachinePlayer
+ *  "player" based upon an evaluation function.  A full description of what 
+ *  the evaluation function should do appears in the project "README" file.
+ *
+ *  @param board is the Gameboard
+ *  @param player is the MachinePlayer
+ *  @return a double that represents the represents the odds of winning for
+ *    a GameBoard "board" and MachinePlayer "player".
+ **/
+protected double evaluate(GameBoard board, MachinePlayer player)
+
+
+7. Perform minimax tree search (class: GameTreeSearch)
+/**
+ *  chooseMove() returns a new move for MachinePlayer "player" based on
+ *  GameBoard board.  Does not update "board".
+ *
+ *  @param board is the Gameboard
+ *  @param player is the MachinePlayer
+ *  @return a Move based on GameBoard "board" for MachinePlayer "player".
+ **/
+protected Move chooseMove(GameBoard board, MachinePlayer player)
+
+
+
+Method calls:
+
+MachinePlayer.chooseMove()
+- calls GameBoard.getValidMoves() to get all valid moves
+- calls GameTreeSearch.chooseMove() to execute minimax algo on moves and make best one
+- calls GameBoard.hasValidNetwork() to see if it made a winning move
+
+GameTreeSearch.chooseMove()
+- calls Evaluation.evaluate() to get score of GameBoard
+
+GameBoard.hasValidNetwork()
+- calls GameBoard.getConnections() to check if there's connection from goal to goal
