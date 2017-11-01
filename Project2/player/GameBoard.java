@@ -247,15 +247,122 @@ public class GameBoard {
   }
 
   /**
-   *  getConnections() generates a List of chips (prior Moves) that form a
-   *  connection with the current chip (current Move).
+   *  getConnections() generates a List of chip positions, Integer arrays coordinates,
+   *  already on the board that form a connection with the current chip position.
    *
-   *  @param side is MachinePlayer.COMPUTER or MachinePlayer.OPPONENT
-   *  @param m is the move player "side" wants to make
-   *  @return a List of all prior moves that form a connection with Move "m".
+   *  @param whitePlayer true if white player, false if black player
+   *  @param x is x coordinate of the square the chip is in.
+   *  @param y is the y coordinate of the square the chip is in.
+   *  @return a List of chip positions that form a connection with chip at given x,y.
+   *
+   *  Performance: runs in O(1) time.
    **/
-  protected List getConnections(int side, Move m) {
-    return null;
+  protected List<Integer[]> getConnections(boolean whitePlayer, int x, int y) {
+    List<Integer[]> connections = new DList<>();
+    int playerChipColor;
+    int opponentChipColor;
+
+    if (whitePlayer) {
+      playerChipColor = WHITE_CHIP;
+      opponentChipColor = BLACK_CHIP;
+    } else {
+      playerChipColor = BLACK_CHIP;
+      opponentChipColor = WHITE_CHIP;
+    }
+    // check all directions to see if there's a connecting chip
+    // for up, down, left, and right, first check if in goal area (no connection between chips in
+    // same goal)
+
+    // up
+    if (x > 0 && x < BOARD_SIZE-1) {
+      for (int j = y - 1; j >= 0; j--) {
+        if (board[x][j] == opponentChipColor) {
+          break;
+        } else if (board[x][j] == playerChipColor) {
+          Integer[] square = {x, j};
+          connections.insertBack(square);
+          break;
+        }
+      }
+    }
+    // down
+    if (x > 0 && x < BOARD_SIZE-1) {
+      for (int j = y + 1; j < BOARD_SIZE; j++) {
+        if (board[x][j] == opponentChipColor) {
+          break;
+        } else if (board[x][j] == playerChipColor) {
+          Integer[] square = {x, j};
+          connections.insertBack(square);
+          break;
+        }
+      }
+    }
+    // left
+    if (y > 0 && y < BOARD_SIZE-1) {
+      for (int i = x - 1; i >= 0; i--) {
+        if (board[i][y] == opponentChipColor) {
+          break;
+        } else if (board[i][y] == playerChipColor) {
+          Integer[] square = {i, y};
+          connections.insertBack(square);
+          break;
+        }
+      }
+    }
+    // right
+    if (y > 0 && y < BOARD_SIZE-1) {
+      for (int i = x + 1; i < BOARD_SIZE; i++) {
+        if (board[i][y] == opponentChipColor) {
+          break;
+        } else if (board[i][y] == playerChipColor) {
+          Integer[] square = {i, y};
+          connections.insertBack(square);
+          break;
+        }
+      }
+    }
+    // up left
+    for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--) {
+      if (board[i][j] == opponentChipColor) {
+        break;
+      } else if (board[i][j] == playerChipColor) {
+        Integer[] square = {i, j};
+        connections.insertBack(square);
+        break;
+      }
+    }
+    // up right
+    for (int i = x + 1, j = y - 1; i < BOARD_SIZE && j >= 0; i++, j--) {
+      if (board[i][j] == opponentChipColor) {
+        break;
+      } else if (board[i][j] == playerChipColor) {
+        Integer[] square = {i, j};
+        connections.insertBack(square);
+        break;
+      }
+    }
+    // down left
+    for (int i = x - 1, j = y + 1; i >= 0 && j < BOARD_SIZE; i--, j++) {
+      if (board[i][j] == opponentChipColor) {
+        break;
+      } else if (board[i][j] == playerChipColor) {
+        Integer[] square = {i, j};
+        connections.insertBack(square);
+        break;
+      }
+    }
+    // down right
+    for (int i = x + 1, j = y + 1; i < BOARD_SIZE && j < BOARD_SIZE; i++, j++) {
+      if (board[i][j] == opponentChipColor) {
+        break;
+      } else if (board[i][j] == playerChipColor) {
+        Integer[] square = {i, j};
+        connections.insertBack(square);
+        break;
+      }
+    }
+
+    return connections;
   }
 
   /**
@@ -270,11 +377,11 @@ public class GameBoard {
    *    If GameBoard squares contain illegal values, the behavior of this
    *      method is undefined (i.e., don't expect any reasonable behavior).
    *
-   *  @param side is MachinePlayer.COMPUTER or MachinePlayer.OPPONENT
+   *  @param whitePlayer true if white player, false if black player
    *  @return true if player "side" has a winning network in "this" GameBoard,
    *    false otherwise.
    **/
-  protected boolean hasValidNetwork(int side) {
+  protected boolean hasValidNetwork(boolean whitePlayer) {
     return false;
   }
 
