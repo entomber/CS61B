@@ -5,10 +5,10 @@ package DataStructures.List;
 /**
  *  A List is a mutable list ADT.  No implementation is provided.
  *
- *  This is my HW5 solution expanded to use generics.
+ *  This is my HW5 solution expanded to use generics and Iterable interface
  **/
 
-public abstract class List<E> {
+public abstract class List<E> implements Iterable<E> {
 
   /**
    *  size is the number of items in the list.

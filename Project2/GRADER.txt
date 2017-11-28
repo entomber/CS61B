@@ -161,3 +161,7 @@ protected double evaluate(GameBoard board, MachinePlayer player)
  *  @return a Move based on GameBoard "board" for MachinePlayer "player".
  **/
 protected Move chooseMove(GameBoard board, MachinePlayer player)
+
+Enhancements/optimizations after main implementation:
+- implement remove() for necessary iterators
+- look into Java 8 streams

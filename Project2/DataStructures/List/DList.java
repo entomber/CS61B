@@ -2,6 +2,9 @@
 
 package DataStructures.List;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  *  A DList is a mutable doubly-linked list ADT.  Its implementation is
  *  circularly-linked and employs a sentinel node at the head of the list.
@@ -49,7 +52,7 @@ public class DList<E> extends List<E> {
    **/
   protected DListNode<E> newNode(E item, DList<E> list,
                               DListNode<E> prev, DListNode<E> next) {
-    return new DListNode<>(item, list, prev, next);
+    return new DListNode<E>(item, list, prev, next);
   }
 
   /**
@@ -138,6 +141,66 @@ public class DList<E> extends List<E> {
     return sb.toString();
   }
 
+  @Override
+  public Iterator<E> iterator() {
+    return new DListIterator();
+  }
+
+  private class DListIterator implements Iterator<E> {
+    private ListNode<E> currentNode = null;
+    private int remaining = size;
+    private boolean calledNext = false;
+
+    @Override
+    public boolean hasNext() {
+      return remaining > 0;
+    }
+
+    @Override
+    public E next() {
+      calledNext = true;
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+      if (currentNode == null) {
+        currentNode = head.next;
+        remaining--;
+        try {
+          return currentNode.item();
+        } catch (InvalidNodeException e) {
+          e.printStackTrace();
+        }
+      }
+      try {
+        currentNode = currentNode.next();
+        remaining--;
+        return currentNode.item();
+      } catch (InvalidNodeException e) {
+        e.printStackTrace();
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() {
+      if (!calledNext) {
+        throw new IllegalStateException("next() has not been called yet.");
+      }
+      try {
+        // set current node to a temp node after remove() called to preserve next reference
+        DListNode<E> tempNode = newNode(null, DList.this, null,
+            (DListNode<E>) currentNode.next());
+        currentNode.remove();
+        currentNode = tempNode;
+        calledNext = false;
+      } catch (InvalidNodeException e) {
+        e.printStackTrace();
+      }
+    }
+
+
+  }
+
   private static void testInvalidNode(ListNode<Integer> p) {
     System.out.println("p.isValidNode() should be false: " + p.isValidNode());
     try {
@@ -189,7 +252,7 @@ public class DList<E> extends List<E> {
   }
 
   private static void testEmpty() {
-    List<Integer> l = new DList<>();
+    List<Integer> l = new DList<Integer>();
     System.out.println("An empty list should be [  ]: " + l);
     System.out.println("l.isEmpty() should be true: " + l.isEmpty());
     System.out.println("l.length() should be 0: " + l.length());
@@ -205,7 +268,7 @@ public class DList<E> extends List<E> {
 
   public static void main(String[] argv) {
     testEmpty();
-    List<Integer> l = new DList<>();
+    List<Integer> l = new DList<Integer>();
     l.insertFront(3);
     l.insertFront(2);
     l.insertFront(1);
