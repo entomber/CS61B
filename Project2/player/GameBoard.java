@@ -15,6 +15,7 @@ import java.util.Iterator;
 public class GameBoard {
 
   /**
+   * MIN_CONNECTION_LENGTH is the minimum number of chips required for a network.
    * BOARD_SIZE is the size of the game board.
    * NO_CHIP is stored in a square without any chip.
    * WHITE_CHIP is stored in a square with a white chip.
@@ -32,6 +33,7 @@ public class GameBoard {
    * blackChipsTopGoal is a List of black chips in the top black goal area.
    * blackChipsBottomGoal is a List of black chips in the bottom black goal area.
    */
+  private final static int MIN_CONNECTION_LENGTH = 6;
   private final static int BOARD_SIZE = 8;
   private final static int NO_CHIP = 0;
   private final static int WHITE_CHIP = 1;
@@ -520,7 +522,7 @@ public class GameBoard {
         exclusion.remove(new IntegerArray(firstGoalSquare));
         exclusion.remove(new IntegerArray(secondGoalSquare));
         DepthFirstPaths dfs = new DepthFirstPaths(sg, g, sg.index(new IntegerArray(firstGoalSquare)),
-            sg.index(new IntegerArray(secondGoalSquare)), exclusion, 6);
+            sg.index(new IntegerArray(secondGoalSquare)), exclusion, MIN_CONNECTION_LENGTH);
         exclusion.insert(new IntegerArray(firstGoalSquare), null);
         exclusion.insert(new IntegerArray(secondGoalSquare), null);
         // for debugging

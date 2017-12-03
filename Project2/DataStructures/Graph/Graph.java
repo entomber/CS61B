@@ -7,8 +7,8 @@ import DataStructures.List.DList;
  * This Graph implementation maintains a vertex-indexed array of lists of integer arrays.
  * The index of the list represents the origin vertex, and each integer array represents a
  * destination vertex with a directional identifier from the origin to the destination vertex.
- * The graph is undirected so every edge appears twice: if an edge connects v and w, then w
- * appears in v's list and v appears in w's list.
+ * The graph is directed: if an edge connects v to w, it is not necessarily true that another
+ * edge connects w to v.
  *
  * Credit to Algorithms 4th by Sedgewick & Wayne (pgs. 526).
  * Modifications:
@@ -73,9 +73,7 @@ public class Graph {
    */
   public void addEdge(int v, int w, int dir) {
     Integer[] vToW = {w, dir};
-    Integer[] wToV = {v, -dir};
     adj[v].insertBack(vToW); // add w to v's list
-    adj[w].insertBack(wToV); // add v to w's list
     E++;
   }
 

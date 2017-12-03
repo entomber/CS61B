@@ -547,7 +547,7 @@ public class GameBoardTest {
   public void hasValidNetwork_partialBoardNoNetwork() {
     GameBoard board = new GameBoard();
 
-    int[][] moves = { {2,0}, /*{6,0},*/ {4,2}, {1,3}, /*{3,3},*/ {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
+    int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
     for (int[] move : moves) {
       board.setBlackChip(new Move(move[0], move[1]));
     }

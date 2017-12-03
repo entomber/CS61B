@@ -45,7 +45,7 @@ public class IntegerArray {
       return false;
     }
     for (int i = 0; i < component.length; i++) {
-      if (component[i] != other.component[i]) {
+      if (!component[i].equals(other.component[i])) {
         return false;
       }
     }

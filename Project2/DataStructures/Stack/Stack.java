@@ -106,6 +106,25 @@ public class Stack<E> extends StackInterface<E> {
   }
 
   /**
+   * find() returns true if item is in the Stack, false otherwise.
+   *
+   * @return true if the item is in the Stack, false otherwise.
+   *
+   * Performance: runs in O(n) time, where n is the length of the Stack.
+   */
+  @Override
+  public boolean find(E item) {
+    boolean found = false;
+    for (E el : this) {
+      if (item == el) {
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
+  /**
    * toString() returns a String representation of this Stack.
    *
    * @return a String representation of this Stack.

@@ -71,6 +71,15 @@ public abstract class List<E> implements Iterable<E> {
   public abstract ListNode<E> back();
 
   /**
+   *  contains() returns true if the item is in this List, false otherwise.
+   *
+   *  @return true if the item is in the List, false otherwise.
+   *
+   *  Performance: runs in O(n) time, where n is the length of this List.
+   */
+  public abstract boolean contains(E item);
+
+  /**
    *  toString() returns a String representation of this List.
    *
    *  @return a String representation of this List.

@@ -122,6 +122,22 @@ public class DList<E> extends List<E> {
   }
 
   /**
+   *  contains() returns true if the item is in this List, false otherwise.
+   *
+   *  @return true if the item is in the List, false otherwise.
+   *
+   *  Performance: runs in O(n) time, where n is the length of this List.
+   */
+  public boolean contains(E item) {
+    for (E el : this) {
+      if (el.equals(item)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    *  toString() returns a String representation of this DList.
    *
    *  @return a String representation of this DList.

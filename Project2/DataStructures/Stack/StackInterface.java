@@ -48,6 +48,15 @@ public abstract class StackInterface<E> implements Iterable<E> {
   public abstract E peek();
 
   /**
+   * find() returns true if item is in the Stack, false otherwise.
+   *
+   * @return true if the item is in the Stack, false otherwise.
+   *
+   * Performance: runs in O(n) time, where n is the length of the Stack.
+   */
+  public abstract boolean find(E item);
+
+  /**
    * toString() returns a String representation of this Stack.
    *
    * @return a String representation of this Stack.
