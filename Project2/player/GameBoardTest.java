@@ -530,7 +530,46 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNetwork() {
+  public void hasValidNetwork_partialBoardNoBottomGoalChip() {
+    GameBoard board = new GameBoard();
+
+    int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, /*{5,7}*/ };
+    for (int[] move : moves) {
+      board.setBlackChip(new Move(move[0], move[1]));
+    }
+    board.setWhiteChip(new Move(4, 5));
+    assertFalse("Board has a valid network.", board.hasValidNetwork(false));
+  }
+
+  // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
+  @Test
+  public void hasValidNetwork_partialBoardNoTopGoalChip() {
+    GameBoard board = new GameBoard();
+
+    int[][] moves = { /*{2,0}, {6,0},*/ {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
+    for (int[] move : moves) {
+      board.setBlackChip(new Move(move[0], move[1]));
+    }
+    board.setWhiteChip(new Move(4, 5));
+    assertFalse("Board has a valid network.", board.hasValidNetwork(false));
+  }
+
+  // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
+  @Test
+  public void hasValidNetwork_partialBoardNoTopOrBottomGoalChips() {
+    GameBoard board = new GameBoard();
+
+    int[][] moves = { /*{2,0}, {6,0},*/ {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}/*, {5,7}*/ };
+    for (int[] move : moves) {
+      board.setBlackChip(new Move(move[0], move[1]));
+    }
+    board.setWhiteChip(new Move(4, 5));
+    assertFalse("Board has a valid network.", board.hasValidNetwork(false));
+  }
+
+  // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
+  @Test
+  public void hasValidNetwork_partialBoardNetwork1() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
@@ -538,13 +577,13 @@ public class GameBoardTest {
       board.setBlackChip(new Move(move[0], move[1]));
     }
     board.setWhiteChip(new Move(4, 5));
+    // 20 - 25 - 35 - 33 - 55 - 57
     assertTrue("Board has a valid network.", board.hasValidNetwork(false));
   }
 
-  // TODO debug why path length < 6 still pass
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNoNetwork() {
+  public void hasValidNetwork_partialBoardNetwork2() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
@@ -552,6 +591,49 @@ public class GameBoardTest {
       board.setBlackChip(new Move(move[0], move[1]));
     }
     board.setWhiteChip(new Move(4, 5));
+    // 60 - 65 - 55 - 33 - 35 - 57
     assertTrue("Board has a valid network.", board.hasValidNetwork(false));
+  }
+
+  // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
+  @Test
+  public void hasValidNetwork_partialBoardNetwork3() {
+    GameBoard board = new GameBoard();
+
+    int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, /*{3,5},*/ {5,5}, {6,5}, {5,7} };
+    for (int[] move : moves) {
+      board.setBlackChip(new Move(move[0], move[1]));
+    }
+    board.setWhiteChip(new Move(4, 5));
+    // 60 - 65 - 55 - 33 - 13 - 57
+    assertTrue("Board has a valid network.", board.hasValidNetwork(false));
+  }
+
+  // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
+  @Test
+  public void hasValidNetwork_partialBoardAllChipsFormNetwork() {
+    GameBoard board = new GameBoard();
+
+    int[][] moves = { /*{2,0},*/ {6,0}, /*{4,2}, {1,3},*/ {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
+    for (int[] move : moves) {
+      board.setBlackChip(new Move(move[0], move[1]));
+    }
+    board.setWhiteChip(new Move(4, 5));
+    // 60 - 65 - 55 - 33 - 35 - 57
+    assertTrue("Board has a valid network.", board.hasValidNetwork(false));
+  }
+
+  // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
+  @Test
+  public void hasValidNetwork_partialBoardShortOneChip() {
+    GameBoard board = new GameBoard();
+
+    int[][] moves = { /*{2,0},*/ {6,0}, /*{4,2}, {1,3}, {3,3}, {2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
+    for (int[] move : moves) {
+      board.setBlackChip(new Move(move[0], move[1]));
+    }
+    board.setWhiteChip(new Move(4, 5));
+    // 60 - 65 - 55 - 33 - 35 - 57
+    assertFalse("Board has a valid network.", board.hasValidNetwork(false));
   }
 }

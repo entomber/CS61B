@@ -450,23 +450,6 @@ public class GameBoard {
    **/
   protected boolean hasValidNetwork(boolean whitePlayer) {
 
-    /*
-     * 1. get list of chip positions for the player
-     * 2. get list of connections for each chip position
-     * 3. store connections in a hash table
-     *
-     * Network search:
-     * 1. start at one of the goals
-     * 2. create a getPath to the other goal if
-     *    a. chip has only been visited once, and
-     *    b. direction change along each connection
-     * 3. if getPath found to other goal, return true. else, go back and explore other paths and
-     *    repeat step 2.
-     *
-     * need to keep track of
-     * - has chip been visited already
-     */
-
     int playerChipColor;
     int chipCount;
     List<Integer[]> chipPositions;
@@ -526,11 +509,11 @@ public class GameBoard {
         exclusion.insert(new IntegerArray(firstGoalSquare), null);
         exclusion.insert(new IntegerArray(secondGoalSquare), null);
         // for debugging
-        System.out.println("s: " + Arrays.toString(firstGoalSquare) + ", d: " +
-            Arrays.toString(secondGoalSquare));
-        for (int vertex : dfs.getPath()) {
-          System.out.println(sg.symbol(vertex));
-        }
+//        System.out.println("s: " + Arrays.toString(firstGoalSquare) + ", d: " +
+//            Arrays.toString(secondGoalSquare));
+//        for (int vertex : dfs.getPath()) {
+//          System.out.println(sg.symbol(vertex));
+//        }
         if (dfs.hasPath()) {
           return true;
         }

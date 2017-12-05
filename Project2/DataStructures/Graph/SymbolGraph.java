@@ -1,14 +1,15 @@
 /* SymbolGraph.java */
 
 /**
- * This Graph client allows clients to define graphs with Integer[] vertex symbols instead of
- * int indices.  It maintains instance variables table (a hash table that maps Integer[]
- * to indices), keys (a hash table that maps indices to Integer[]), and G (a graph, with
+ * This Graph client allows clients to define graphs with IntegerArray vertex symbols instead of
+ * int indices.  It maintains instance variables table (a hash table that maps IntegerArray
+ * to indices), keys (a hash table that maps indices to IntegerArray), and G (a graph, with
  * int vertex indices).
  *
  * To build these data structures:
  *  1. Insert all the vertices using addVertex(), then
  *  2. Connect all the edges between vertices using addEdge()
+ *  3. A graph is generated once the first edge is added. It can be obtained by using G()
  *
  * Credit to Algorithms 4th by Sedgewick & Wayne (pgs. 548-552).
  * Modified to use hash tables to map between vertex symbols and int indices.
@@ -36,7 +37,7 @@ public class SymbolGraph {
   }
 
   /**
-   * addVertex() adds a vertex to this SymbolGraph.  The index assigned to an Integer[] in the
+   * addVertex() adds a vertex to this SymbolGraph.  The index assigned to an IntegerArray in the
    * underlying Graph is 0 to V-1 for V vertices added.
    *
    * @param v an int array (of a chip position) vertex.
@@ -110,7 +111,7 @@ public class SymbolGraph {
   }
 
   /**
-   * symbol() returns the Integer[] of the given index.
+   * symbol() returns the IntegerArray of the given index.
    *
    * @param i the index.
    * @return the key of the vertex if found, or null if not found.

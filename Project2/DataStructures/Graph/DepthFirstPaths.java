@@ -9,8 +9,9 @@ import DataStructures.dict.HashTableChained;
 /**
  * This Graph client uses depth-first search (DFS) to find paths of a minimum length between two given vertices.
  *
- * Credit to Algorithms 4th by Sedgewick & Wayne (pg. 536) and user Casey Watson @
+ * Credit to Algorithms 4th by Sedgewick & Wayne (pg. 536) and user 'Casey Watson' and 'amit' @
  * https://stackoverflow.com/questions/58306/graph-algorithm-to-find-all-connections-between-two-arbitrary-vertices
+ * https://stackoverflow.com/questions/10881014/how-to-find-path-of-exact-length-in-graph
  * Modifications:
  *  - no two adjacent vertices along a path share the same directional element
  *  - paths must adhere to a minimum path length
@@ -50,7 +51,9 @@ public class DepthFirstPaths {
    * @param destination is the destination vertex to find a getPath to.
    * @param excluded the set of vertices to exclude.
    * @param minVertices the minimum required number of vertices in the path.
+   *
    */
+
   public DepthFirstPaths(SymbolGraph SG, Graph G, int source, int destination,
                          HashTableChained excluded, int minVertices) {
     this.destination = destination;
@@ -64,10 +67,41 @@ public class DepthFirstPaths {
 
     visited.insertBack(source);
     dfs(source, Integer.MIN_VALUE);
+//    dfsOther(source, Integer.MIN_VALUE);
   }
 
-  // performs DFS
+  // performs DFS: easier to understand than dfsOther()
   private void dfs(int v, int prevDirection) {
+    int vertexCount = visited.length();
+    // destination found, path length of at least MIN_LENGTH and less than shortestFound
+    if (v == destination && (vertexCount >= MIN_VERTICES && vertexCount < shortestFound)) {
+      shortestFound = vertexCount;
+      List<Integer> path = new DList<Integer>();
+      paths.insert(visited.length(), path);
+      for (Integer i : visited) {
+        path.insertBack(i);
+      }
+      return;
+    }
+    // check all vertices in vertex v's adjacency list
+    for (Integer[] vertexAndDirection : G.adj(v)) {
+      int vertex = vertexAndDirection[0];
+      int currentDirection = vertexAndDirection[1];
+      // perform DFS on vertex if: 1. not visited, 2. direction changed, 3. not excluded
+      if (!visited.contains(vertex) && !isExcluded(vertex) && prevDirection != currentDirection) {
+        visited.insertBack(vertex);
+        dfs(vertex, currentDirection);
+        try {
+          visited.back().remove();
+        } catch (InvalidNodeException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  // performs DFS: first successful implementation, but using the dfs() instead because it's simpler
+  private void dfsOther(int v, int prevDirection) {
     Iterable<Integer[]> adjacent = G.adj(v);
 
     // examine adjacent vertices
@@ -95,15 +129,15 @@ public class DepthFirstPaths {
     for (Integer[] vertexAndDirection : adjacent) {
       int vertex = vertexAndDirection[0];
       int currentDirection = vertexAndDirection[1];
-      // skip vertex conditions: 1. excluded, 2. visited, 3. no direction change, 4. destination vertex
-      if (isExcluded(vertex) || visited.contains(vertex) ||
-          prevDirection == currentDirection || vertex == destination) {
+      // skip vertex conditions: 1. visited, 2. excluded, 3. no direction change, 4. destination vertex
+      if (visited.contains(vertex) || isExcluded(vertex) || prevDirection == currentDirection ||
+          vertex == destination) {
         continue;
       }
       // visit the vertex and perform DFS on it, remove it after DFS if destination vertex condition in
       // 1st loop is not met
       visited.insertBack(vertex);
-      dfs(vertex, currentDirection);
+      dfsOther(vertex, currentDirection);
       try {
         visited.back().remove();
       } catch (InvalidNodeException e) {
@@ -118,9 +152,9 @@ public class DepthFirstPaths {
   }
 
   /**
-   * hasPathTo() returns true if there is a getPath from vertex s to vertex d, false otherwise.
+   * hasPath() returns true if there is a path from source to destination, false otherwise.
    *
-   * @return true if there is a getPath from vertex s to vertex d, false otherwise.
+   * @return true if there is a path from source to destination, false otherwise.
    */
   public boolean hasPath() {
     for (int i = MIN_VERTICES; i <= MAX_VERTICES; i++) {
@@ -132,9 +166,9 @@ public class DepthFirstPaths {
   }
 
   /**
-   * pathTo() returns the getPath from vertex s to vertex d, or an empty one if there is none.
+   * getPath() returns the path from source to destination, or an empty one if there is none.
    *
-   * @return an Iterable of Integers which contains the getPath from s to v.
+   * @return an Iterable of Integers which contains the path from source to destination.
    */
   public Iterable<Integer> getPath() {
     for (int i = MIN_VERTICES; i <= MAX_VERTICES; i++) {
