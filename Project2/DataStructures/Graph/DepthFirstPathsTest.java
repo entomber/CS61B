@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DepthFirstPathsTest {
 
+  // DFS on a connected graph with 2 vertices and 1 edge between them.
   @Test
   public void DepthFirstPaths_OneEdgePath() {
     SymbolGraph sg = new SymbolGraph();
@@ -19,7 +20,9 @@ public class DepthFirstPathsTest {
     }
     int direction0To1 = 5;
     Integer[] v0To1 = { moves[1][0], moves[1][1], direction0To1 };
+    Integer[] v1To0 = { moves[0][0], moves[0][1], -direction0To1 };
     sg.addEdge(new IntegerArray(moves[0]), new IntegerArray(v0To1)); // connect 0 to 1
+    sg.addEdge(new IntegerArray(moves[0]), new IntegerArray(v1To0)); // connect 1 to 0
     Graph g = sg.G();
     // 2 vertex minimum path length
     DepthFirstPaths dfs = new DepthFirstPaths(sg, g, sg.index(new IntegerArray(moves[0])),
@@ -34,7 +37,7 @@ public class DepthFirstPathsTest {
     }
   }
 
-  // 3-vertex connected graph with minimum vertex lengths 2 and 3
+  // DFS on a connected graph with 3 vertices with minimum vertex lengths 2 and 3.
   @Test
   public void DepthFirstPaths_TwoEdgePathAdjacencySetup1() {
     SymbolGraph sg = new SymbolGraph();
@@ -81,8 +84,8 @@ public class DepthFirstPathsTest {
     }
   }
 
-  // 3-vertex connected graph with minimum vertex length 3 and adjacency list set up different
-  // than DepthFirstPaths_TwoEdgePathAdjacencySetup1()
+  // DFS on connected graph with 3 vertices with minimum vertex length 3 and adjacency list set up different
+  // than DepthFirstPaths_TwoEdgePathAdjacencySetup1().
   @Test
   public void DepthFirstPaths_TwoEdgePathAdjacencySetup2() {
     SymbolGraph sg = new SymbolGraph();
@@ -121,7 +124,7 @@ public class DepthFirstPathsTest {
   }
 
 
-  // 3-vertex connected graph with minimum vertex length 4
+  // DFS on connected graph with 3 vertices with minimum vertex length 4.
   @Test
   public void DepthFirstPaths_TwoEdgePathVertexLength1And2() {
     SymbolGraph sg = new SymbolGraph();

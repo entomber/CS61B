@@ -3,7 +3,6 @@ package DataStructures.Graph;
 import DataStructures.List.DList;
 import DataStructures.List.InvalidNodeException;
 import DataStructures.List.List;
-import DataStructures.Stack.Stack;
 import DataStructures.dict.HashTableChained;
 
 /**

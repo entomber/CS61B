@@ -52,12 +52,7 @@ public class MachinePlayer extends Player {
   // the internal game board) as a move by "this" player.
   public Move chooseMove() {
     // make simple move
-    List<Move> moves;
-    if (color == BLACK_PLAYER) {
-      moves = board.getValidMoves(false);
-    } else {
-      moves = board.getValidMoves(true);
-    }
+    List<Move> moves = board.getValidMoves(color);
     ListNode<Move> node = moves.front();
     Move move = null;
     try {
@@ -66,21 +61,20 @@ public class MachinePlayer extends Player {
       e.printStackTrace();
     }
     if (color == BLACK_PLAYER) {
-      board.setBlackChip(move);
+      board.setChip(BLACK_PLAYER, move);
     } else {
-      board.setWhiteChip(move);
+      board.setChip(WHITE_PLAYER, move);
     }
     return move;
   }
-
 
   // If the Move m is legal, records the move as a move by the opponent
   // (updates the internal game board) and returns true.  If the move is
   // illegal, returns false without modifying the internal state of "this"
   // player.  This method allows your opponents to inform you of their moves.
   public boolean opponentMove(Move m) {
-    return (color == BLACK_PLAYER && board.setWhiteChip(m)) ||
-        (color == WHITE_PLAYER && board.setBlackChip(m));
+    return (color == BLACK_PLAYER && board.setChip(BLACK_PLAYER, m)) ||
+        (color == WHITE_PLAYER && board.setChip(WHITE_PLAYER, m));
   }
 
   // If the Move m is legal, records the move as a move by "this" player
@@ -89,7 +83,11 @@ public class MachinePlayer extends Player {
   // player.  This method is used to help set up "Network problems" for your
   // player to solve.
   public boolean forceMove(Move m) {
-    return (color == BLACK_PLAYER && board.setBlackChip(m)) ||
-        (color == WHITE_PLAYER && board.setWhiteChip(m));
+    return (color == BLACK_PLAYER && board.setChip(BLACK_PLAYER, m)) ||
+        (color == WHITE_PLAYER && board.setChip(WHITE_PLAYER, m));
+  }
+
+  protected int getColor() {
+    return color;
   }
 }

@@ -1,10 +1,7 @@
 package DataStructures.Graph;
 
-import DataStructures.List.List;
 import org.junit.Test;
-import player.GameBoard;
 import player.IntegerArray;
-import player.Move;
 
 import java.util.Arrays;
 
@@ -59,27 +56,33 @@ public class SymbolGraphTest {
     for (Integer[] move : moves) {
       sg.addVertex(new IntegerArray(move));
     }
-    int dirFirstToSecond = 1;
-    int dirSecondToThird = -2;
-    int dirSecondToFifth = 5;
-    Integer[] v1 = { moves[1][0], moves[1][1], dirFirstToSecond };
-    Integer[] v2 = { moves[2][0], moves[2][1], dirSecondToThird };
-    Integer[] v3 = { moves[4][0], moves[4][1], dirSecondToFifth };
-    sg.addEdge(new IntegerArray(moves[0]), new IntegerArray(v1)); // connect first and second
-    sg.addEdge(new IntegerArray(moves[1]), new IntegerArray(v2)); // connect second and third
-    sg.addEdge(new IntegerArray(moves[1]), new IntegerArray(v3)); // connect second and fifth
+    int direction0To1 = 1;
+    int direction1To2 = -2;
+    int direction1To4 = 5;
+    Integer[] v0To1 = { moves[1][0], moves[1][1], direction0To1 };
+    Integer[] v1To2 = { moves[2][0], moves[2][1], direction1To2 };
+    Integer[] v1To4 = { moves[4][0], moves[4][1], direction1To4 };
+    Integer[] v1To0 = { moves[0][0], moves[0][1], -direction0To1 };
+    Integer[] v2To1 = { moves[1][0], moves[1][1], -direction1To2 };
+    Integer[] v4To1 = { moves[1][0], moves[1][1], -direction1To4 };
+    sg.addEdge(new IntegerArray(moves[0]), new IntegerArray(v0To1)); // connect 0 to 1
+    sg.addEdge(new IntegerArray(moves[1]), new IntegerArray(v1To2)); // connect 1 to 2
+    sg.addEdge(new IntegerArray(moves[1]), new IntegerArray(v1To4)); // connect 1 to 4
+    sg.addEdge(new IntegerArray(moves[1]), new IntegerArray(v1To0)); // connect 1 to 0
+    sg.addEdge(new IntegerArray(moves[2]), new IntegerArray(v2To1)); // connect 2 to 1
+    sg.addEdge(new IntegerArray(moves[4]), new IntegerArray(v4To1)); // connect 4 to 1
     Integer[][][] expectedAdj = {
         { moves[1] },
-        { moves[0], moves[2], moves[4] },
+        { moves[2], moves[4], moves[0] },
         { moves[1] },
         { },
         { moves[1] } };
     Integer[][] expectedDir = {
-        { dirFirstToSecond },
-        { -dirFirstToSecond, dirSecondToThird, dirSecondToFifth },
-        { -dirSecondToThird },
+        { direction0To1 },
+        { direction1To2, direction1To4, -direction0To1 },
+        { -direction1To2 },
         { },
-        { -dirSecondToFifth } };
+        { -direction1To4 } };
     Graph g = sg.G();
     for (int i = 0; i < moves.length; i++) {
       Iterable<Integer[]> adj = g.adj(sg.index(new IntegerArray(moves[i])));
