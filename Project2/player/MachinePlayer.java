@@ -52,19 +52,15 @@ public class MachinePlayer extends Player {
   // the internal game board) as a move by "this" player.
   public Move chooseMove() {
     // make simple move
-    List<Move> moves = board.getValidMoves(color);
-    ListNode<Move> node = moves.front();
-    Move move = null;
+    List<MoveWithPlayer> moves = board.getValidMoves(color);
+    ListNode<MoveWithPlayer> node = moves.front();
+    MoveWithPlayer move = null;
     try {
       move = node.item();
     } catch (InvalidNodeException e) {
       e.printStackTrace();
     }
-    if (color == BLACK_PLAYER) {
-      board.setChip(BLACK_PLAYER, move);
-    } else {
-      board.setChip(WHITE_PLAYER, move);
-    }
+    board.setChip(move);
     return move;
   }
 
@@ -73,8 +69,14 @@ public class MachinePlayer extends Player {
   // illegal, returns false without modifying the internal state of "this"
   // player.  This method allows your opponents to inform you of their moves.
   public boolean opponentMove(Move m) {
-    return (color == BLACK_PLAYER && board.setChip(BLACK_PLAYER, m)) ||
-        (color == WHITE_PLAYER && board.setChip(WHITE_PLAYER, m));
+    // TODO: should player color be reversed?
+    MoveWithPlayer move = (MoveWithPlayer) m;
+    if (color == BLACK_PLAYER) {
+      move.player = BLACK_PLAYER;
+    } else {
+      move.player = WHITE_PLAYER;
+    }
+    return board.setChip(move);
   }
 
   // If the Move m is legal, records the move as a move by "this" player
@@ -83,8 +85,13 @@ public class MachinePlayer extends Player {
   // player.  This method is used to help set up "Network problems" for your
   // player to solve.
   public boolean forceMove(Move m) {
-    return (color == BLACK_PLAYER && board.setChip(BLACK_PLAYER, m)) ||
-        (color == WHITE_PLAYER && board.setChip(WHITE_PLAYER, m));
+    MoveWithPlayer move = (MoveWithPlayer) m;
+    if (color == BLACK_PLAYER) {
+      move.player = BLACK_PLAYER;
+    } else {
+      move.player = WHITE_PLAYER;
+    }
+    return board.setChip(move);
   }
 
   protected int getColor() {

@@ -3,6 +3,7 @@ package player;
 import DataStructures.Graph.DepthFirstPaths;
 import DataStructures.Graph.Graph;
 import DataStructures.Graph.SymbolGraph;
+import DataStructures.List.InvalidNodeException;
 import DataStructures.List.List;
 import DataStructures.List.DList;
 import DataStructures.dict.HashTableChained;
@@ -30,6 +31,7 @@ public class GameBoard {
    * whiteChipsRightGoal is a List of white chips in the right white goal area.
    * blackChipsTopGoal is a List of black chips in the top black goal area.
    * blackChipsBottomGoal is a List of black chips in the bottom black goal area.
+   *
    */
   private final static int BLACK_PLAYER = 0;
   private final static int WHITE_PLAYER = 1;
@@ -49,14 +51,16 @@ public class GameBoard {
   final static int DIR_UP_LEFT = -DIR_DOWN_RIGHT;
 
   private int[][] board;
-  private List<Integer[]> whiteChipPositions;
-  private List<Integer[]> blackChipPositions;
+   List<Integer[]> whiteChipPositions;
+   List<Integer[]> blackChipPositions;
   private int whiteChipCount;
   private int blackChipCount;
   private List<Integer[]> whiteChipsLeftGoal;
   private List<Integer[]> whiteChipsRightGoal;
   private List<Integer[]> blackChipsTopGoal;
   private List<Integer[]> blackChipsBottomGoal;
+  private List<MoveWithPlayer> whiteMoves;
+  private List<MoveWithPlayer> blackMoves;
 
   /**
    *  Creates a new game board
@@ -75,32 +79,27 @@ public class GameBoard {
     whiteChipsRightGoal = new DList<Integer[]>();
     blackChipsTopGoal = new DList<Integer[]>();
     blackChipsBottomGoal = new DList<Integer[]>();
+    whiteMoves = new DList<MoveWithPlayer>();
+    blackMoves = new DList<MoveWithPlayer>();
   }
 
   /**
    *  setChip() sets a chip for a given player on the board.  For step moves, it removes the
    *  chip from the previous position.
    *
-   *  Unusual conditions:
-   *   - if player is neither WHITE_PLAYER nor BLACK_PLAYER, throws IllegalArgumentException.
-   *
-   *  @param player is WHITE_PLAYER or BLACK_PLAYER.
-   *  @param m is the move player wants to make.
+   *  @param move is the move player wants to make.
    *  @return true if move was valid and completed, false otherwise.
    *
    *  Performance: runs in O(1) time.
    */
-  protected boolean setChip(int player, Move m) {
-    if (player != WHITE_PLAYER && player != BLACK_PLAYER) {
-      throw new IllegalArgumentException("Invalid player specified.");
-    }
-    if (!isValidMove(player, m)) {
+  protected boolean setChip(MoveWithPlayer move) {
+    if (!isValidMove(move)) {
       return false;
     }
     int chipCount;
     List<Integer[]> chipPositions;
     int chipColor;
-    if (player == WHITE_PLAYER) {
+    if (move.player == WHITE_PLAYER) {
       chipCount = whiteChipCount;
       chipPositions = whiteChipPositions;
       chipColor = WHITE_CHIP;
@@ -109,133 +108,200 @@ public class GameBoard {
       chipPositions = blackChipPositions;
       chipColor = BLACK_CHIP;
     }
+    // step move
     if (chipCount == 10) {
-      // remove chip in old position for step move
-      for (Integer[] square : chipPositions) {
-        if (m.x2 == square[0] && m.y2 == square[1]) {
-          // if in left goal area, remove from left goal chip list
-          if (inLeftGoal(m.x2, m.y2)) {
-            Iterator<Integer[]> iter = whiteChipsLeftGoal.iterator();
-            while (iter.hasNext()) {
-              Integer[] goalSquare = iter.next();
-              if (m.x2 == goalSquare[0] && m.y2 == goalSquare[1]) {
-                iter.remove();
-                break;
-              }
-            }
-          }
-          // if in right goal area, remove from right goal chip list
-          else if (inRightGoal(m.x2, m.y2)) {
-            Iterator<Integer[]> iter = whiteChipsRightGoal.iterator();
-            while (iter.hasNext()) {
-              Integer[] goalSquare = iter.next();
-              if (m.x2 == goalSquare[0] && m.y2 == goalSquare[1]) {
-                iter.remove();
-                break;
-              }
-            }
-          }
-          // if in top goal area, remove from top goal chip list
-          else if (inTopGoal(m.x2, m.y2)) {
-            Iterator<Integer[]> iter = blackChipsTopGoal.iterator();
-            while (iter.hasNext()) {
-              Integer[] goalSquare = iter.next();
-              if (m.x2 == goalSquare[0] && m.y2 == goalSquare[1]) {
-                iter.remove();
-                break;
-              }
-            }
-          }
-          // if in bottom goal area, remove from bottom goal chip list
-          else if (inBottomGoal(m.x2, m.y2)) {
-            Iterator<Integer[]> iter = blackChipsBottomGoal.iterator();
-            while (iter.hasNext()) {
-              Integer[] goalSquare = iter.next();
-              if (m.x2 == goalSquare[0] && m.y2 == goalSquare[1]) {
-                iter.remove();
-                break;
-              }
-            }
-          }
+      // remove chip in old position
+      Iterator<Integer[]> iter = chipPositions.iterator();
+      while (iter.hasNext()) {
+        Integer[] square = iter.next();
+        if (move.x2 == square[0] && move.y2 == square[1]) {
+          iter.remove();
+          break;
         }
       }
-      board[m.x2][m.y2] = NO_CHIP;
-      board[m.x1][m.y1] = chipColor;
-    } else {
-      board[m.x1][m.y1] = chipColor;
-      if (player == WHITE_PLAYER) {
+      // if old chip position is in goal list, remove it from respective list
+      removeChipIfInGoal(move.x2, move.y2);
+      board[move.x2][move.y2] = NO_CHIP;
+      board[move.x1][move.y1] = chipColor;
+    }
+    // add move
+    else {
+      // what if chip we removed is in goal list?
+      board[move.x1][move.y1] = chipColor;
+      if (move.player == WHITE_PLAYER) {
         whiteChipCount++;
       } else {
         blackChipCount++;
       }
     }
-    Integer[] square = { m.x1, m.y1 };
+    Integer[] square = { move.x1, move.y1 };
     // add to goal chip list
-    if (inLeftGoal(m.x1, m.y1)) {
+    if (inLeftGoal(move.x1, move.y1)) {
       whiteChipsLeftGoal.insertBack(square);
-    } else if (inRightGoal(m.x1, m.y1)) {
+    } else if (inRightGoal(move.x1, move.y1)) {
       whiteChipsRightGoal.insertBack(square);
-    } else if (inTopGoal(m.x1, m.y1)) {
+    } else if (inTopGoal(move.x1, move.y1)) {
       blackChipsTopGoal.insertBack(square);
-    } else if (inBottomGoal(m.x1, m.y1)) {
+    } else if (inBottomGoal(move.x1, move.y1)) {
       blackChipsBottomGoal.insertBack(square);
     }
+    // add chip to chipPositions
     chipPositions.insertBack(square);
+    // save move data for undo
+    if (move.player == WHITE_PLAYER) {
+      whiteMoves.insertBack(move);
+    } else {
+      blackMoves.insertBack(move);
+    }
     return true;
   }
 
+  protected boolean undoSetChip(int player) {
+    List<MoveWithPlayer> moves;
+    int chipColor;
+    List<Integer[]> chipPositions;
+    if (player == WHITE_PLAYER) {
+      moves = whiteMoves;
+      chipColor = WHITE_CHIP;
+      chipPositions = whiteChipPositions;
+    } else {
+      moves = blackMoves;
+      chipColor = BLACK_CHIP;
+      chipPositions = blackChipPositions;
+    }
+    // no moves made yet
+    if (moves.length() == 0) {
+      return false;
+    }
+    // save reference to last move and remove it from moves list
+    // also remove last chip from chipPositions which was the last added chip
+    MoveWithPlayer lastMove = null;
+    try {
+      lastMove = moves.back().item();
+      moves.back().remove();
+      chipPositions.back().remove();
+    } catch (InvalidNodeException e) {
+      e.printStackTrace();
+    }
+    // step moves
+    if (lastMove.moveKind == Move.STEP) {
+      // add old chip position of step move
+      Integer[] square = { lastMove.x2, lastMove.y2 };
+      chipPositions.insertBack(square);
+      board[lastMove.x1][lastMove.y1] = NO_CHIP;
+      board[lastMove.x2][lastMove.y2] = chipColor;
+    }
+    // add moves
+    if (lastMove.moveKind == Move.ADD) {
+      if (lastMove.player == WHITE_PLAYER) {
+        whiteChipCount--;
+      } else {
+        blackChipCount--;
+      }
+      board[lastMove.x1][lastMove.y1] = NO_CHIP;
+    }
+    // remove if in goal list
+    removeChipIfInGoal(lastMove.x1, lastMove.y1);
+    return true;
+  }
+
+  // removes the chip at given x, y position if it is in the goal area
+  private void removeChipIfInGoal(int x, int y) {
+    // if in left goal area, remove from left goal chip list
+    if (inLeftGoal(x, y)) {
+      Iterator<Integer[]> iter = whiteChipsLeftGoal.iterator();
+      while (iter.hasNext()) {
+        Integer[] goalSquare = iter.next();
+        if (x == goalSquare[0] && y == goalSquare[1]) {
+          iter.remove();
+          break;
+        }
+      }
+    }
+    // if in right goal area, remove from right goal chip list
+    else if (inRightGoal(x, y)) {
+      Iterator<Integer[]> iter = whiteChipsRightGoal.iterator();
+      while (iter.hasNext()) {
+        Integer[] goalSquare = iter.next();
+        if (x == goalSquare[0] && y == goalSquare[1]) {
+          iter.remove();
+          break;
+        }
+      }
+    }
+    // if in top goal area, remove from top goal chip list
+    else if (inTopGoal(x, y)) {
+      Iterator<Integer[]> iter = blackChipsTopGoal.iterator();
+      while (iter.hasNext()) {
+        Integer[] goalSquare = iter.next();
+        if (x == goalSquare[0] && y == goalSquare[1]) {
+          iter.remove();
+          break;
+        }
+      }
+    }
+    // if in bottom goal area, remove from bottom goal chip list
+    else if (inBottomGoal(x, y)) {
+      Iterator<Integer[]> iter = blackChipsBottomGoal.iterator();
+      while (iter.hasNext()) {
+        Integer[] goalSquare = iter.next();
+        if (x == goalSquare[0] && y == goalSquare[1]) {
+          iter.remove();
+          break;
+        }
+      }
+    }
+  }
+
   /**
-   *  isValidMove() determines whether a Move "m" is valid for player.
+   *  isValidMove() determines whether a Move "move" is valid for player.
    *  A full description of what constitutes a valid move appears in the
    *  project "README" file.
    *
-   *  Unusual conditions:
-   *   - if player is neither WHITE_PLAYER nor BLACK_PLAYER, throws IllegalArgumentException.
-   *
-   *  @param player is WHITE_PLAYER or BLACK_PLAYER.
-   *  @param m is the move player wants to make.
-   *  @return true if Move "m" is valid for player, false otherwise.
+   *  @param move is the move player wants to make.
+   *  @return true if Move "move" is valid for player, false otherwise.
    *
    *  Performance: runs in O(1) time.
    **/
-  private boolean isValidMove(int player, Move m) {
-    if (player != WHITE_PLAYER && player != BLACK_PLAYER) {
-      throw new IllegalArgumentException("Invalid player specified.");
+  private boolean isValidMove(MoveWithPlayer move) {
+    // move.player should be WHITE_PLAYER or BLACK_PLAYER.
+    if (move.player != WHITE_PLAYER && move.player != BLACK_PLAYER) {
+      return false;
     }
     // No chip may be placed outside game board.
-    if (m.x1 < 0 || m.x1 > BOARD_SIZE-1 || m.y1 < 0 || m.y1 > BOARD_SIZE-1) {
+    if (move.x1 < 0 || move.x1 > BOARD_SIZE-1 || move.y1 < 0 || move.y1 > BOARD_SIZE-1) {
       return false;
     }
     // No chip may be placed in any of the four corners.
-    if (inCorner(m.x1, m.y1)) {
+    if (inCorner(move.x1, move.y1)) {
       return false;
     }
     // No chip may be placed in a goal of the opposite color.
-    if ((player == WHITE_PLAYER && (inTopGoal(m.x1, m.y1) || inBottomGoal(m.x1, m.y1))) ||
-        (player == BLACK_PLAYER && (inLeftGoal(m.x1, m.y1) || inRightGoal(m.x1, m.y1)))) {
+    if ((move.player == WHITE_PLAYER && (inTopGoal(move.x1, move.y1) || inBottomGoal(move.x1, move.y1))) ||
+        (move.player == BLACK_PLAYER && (inLeftGoal(move.x1, move.y1) || inRightGoal(move.x1, move.y1)))) {
       return false;
     }
     // No chip may be placed in a square that is already occupied.
-    if (board[m.x1][m.y1] != NO_CHIP) {
+    if (board[move.x1][move.y1] != NO_CHIP) {
       return false;
     }
     // No clusters of three or more chips of the same color.
-    if (player == WHITE_PLAYER && neighboringChips(WHITE_CHIP, m.x1, m.y1, -1, -1) > 2 ||
-        player == BLACK_PLAYER && neighboringChips(BLACK_CHIP, m.x1, m.y1, -1, -1) > 2) {
+    if (move.player == WHITE_PLAYER && neighboringChips(WHITE_CHIP, move.x1, move.y1, -1, -1) > 2 ||
+        move.player == BLACK_PLAYER && neighboringChips(BLACK_CHIP, move.x1, move.y1, -1, -1) > 2) {
       return false;
     }
     // Player attempting step move when they have less than 10 chips on the board.
-    if (m.moveKind == Move.STEP && ((player == WHITE_PLAYER && whiteChipCount < 10) ||
-        (player == BLACK_PLAYER && blackChipCount < 10))) {
+    if (move.moveKind == Move.STEP && ((move.player == WHITE_PLAYER && whiteChipCount < 10) ||
+        (move.player == BLACK_PLAYER && blackChipCount < 10))) {
       return false;
     }
     // Player attempting add move when they have 10 or more chips on the board.
-    if (m.moveKind == Move.ADD && ((player == WHITE_PLAYER && whiteChipCount == 10) ||
-        (player == BLACK_PLAYER && blackChipCount >= 10))) {
+    if (move.moveKind == Move.ADD && ((move.player == WHITE_PLAYER && whiteChipCount == 10) ||
+        (move.player == BLACK_PLAYER && blackChipCount >= 10))) {
       return false;
     }
     // Player attempting step move to the same square.
-    if (m.moveKind == Move.STEP && m.x1 == m.x2 && m.y1 == m.y2) {
+    if (move.moveKind == Move.STEP && move.x1 == move.x2 && move.y1 == move.y2) {
       return false;
     }
 
@@ -255,7 +321,7 @@ public class GameBoard {
    *
    *  Performance: runs in O(n^2) time, where n is the size of the board, BOARD_SIZE
    **/
-  protected List<Move> getValidMoves(int player) {
+  protected List<MoveWithPlayer> getValidMoves(int player) {
     if (player != WHITE_PLAYER && player != BLACK_PLAYER) {
       throw new IllegalArgumentException("Invalid player specified.");
     }
@@ -268,14 +334,14 @@ public class GameBoard {
       chipCount = blackChipCount;
       chipPositions = blackChipPositions;
     }
-    List<Move> moves = new DList<Move>();
+    List<MoveWithPlayer> validMoves = new DList<MoveWithPlayer>();
     // add move
     if (chipCount < 10) {
       for (int y = 0; y < BOARD_SIZE; y++) {
         for (int x = 0; x < BOARD_SIZE; x++) {
-          Move m = new Move(x, y);
-          if (isValidMove(player, m)) {
-            moves.insertBack(m);
+          MoveWithPlayer m = new MoveWithPlayer(x, y, player);
+          if (isValidMove(m)) {
+            validMoves.insertBack(m);
           }
         }
       }
@@ -285,16 +351,16 @@ public class GameBoard {
       for (Integer[] square : chipPositions) {
         for (int y = 0; y < BOARD_SIZE; y++) {
           for (int x = 0; x < BOARD_SIZE; x++) {
-            Move m = new Move(x, y, square[0], square[1]);
-            if (isValidMove(player, m)) {
-              moves.insertBack(m);
+            MoveWithPlayer m = new MoveWithPlayer(x, y, square[0], square[1], player);
+            if (isValidMove(m)) {
+              validMoves.insertBack(m);
             }
           }
         }
       }
     }
 
-    return moves;
+    return validMoves;
   }
 
   /**
@@ -620,8 +686,7 @@ public class GameBoard {
     if (inNonBorder(x, y)) {
       for (int j = y-1; j <= y+1; j++) {
         for (int i = x-1; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) &&
-              !(i == xPrev && j == yPrev)) {
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
             count += neighboringChips(chipColor, i, j, x, y);
           }
         }
@@ -631,8 +696,7 @@ public class GameBoard {
     else if (inTopGoal(x, y)) {
       for (int j = y; j <= y+1; j++) {
         for (int i = x-1; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) &&
-              !(i == xPrev && j == yPrev)) {
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
             count += neighboringChips(chipColor, i, j, x, y);
           }
         }
@@ -642,8 +706,7 @@ public class GameBoard {
     else if (inBottomGoal(x, y)) {
       for (int j = y-1; j <= y; j++) {
         for (int i = x-1; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) &&
-              !(i == xPrev && j == yPrev)) {
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
             count += neighboringChips(chipColor, i, j, x, y);
           }
         }
@@ -653,8 +716,7 @@ public class GameBoard {
     else if (inLeftGoal(x, y)) {
       for (int j = y-1; j <= y+1; j++) {
         for (int i = x; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) &&
-              !(i == xPrev && j == yPrev)) {
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
             count += neighboringChips(chipColor, i, j, x, y);
           }
         }
@@ -664,8 +726,7 @@ public class GameBoard {
     else if (inRightGoal(x, y)) {
       for (int j = y-1; j <= y+1; j++) {
         for (int i = x-1; i <= x; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) &&
-              !(i == xPrev && j == yPrev)) {
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
             count += neighboringChips(chipColor, i, j, xPrev, yPrev);
           }
         }
