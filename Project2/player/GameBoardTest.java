@@ -1,10 +1,12 @@
 package player;
 
 
+import DataStructures.List.DList;
 import DataStructures.List.InvalidNodeException;
 import DataStructures.List.List;
 import DataStructures.List.ListNode;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -128,27 +130,38 @@ public class GameBoardTest {
     }
   }
 
-  // test setChip() on moves step move that should not form clusters.
+  // test setChip() on step moves that should not form clusters. Series of step moves below moves chip 1
+  // that is adjacent to chip 2 to another position while maintaining adjacency with chip 2
+  // (e.g. step move 1 to x position: 1 2 x -> x 2 1)
   @Test
-  public void setChip_stepMoveNoClusters() {
+  public void setChip_stepMoveDoNotCluster() {
     GameBoard board = new GameBoard();
     // 10 black chips
-    int[][] blackMoves = { {1,0}, {2,0}, {1,7}, {2,7}, {1,2}, {2,2}, {1,5}, {2,5}, {5,0}, {5,7} };
+    int[][] blackMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
     for (int[] move : blackMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
     }
     // 10 white chips
-    int[][] whiteMoves = { {0,1}, {0,2}, {7,1}, {7,2}, {3,1}, {4,1}, {3,3}, {4,3}, {0,5}, {7,5} };
+    int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {0,6}, {7,1}, {7,2}, {7,5}, {7,6}, {5,3}, {5,4} };
     for (int[] move : whiteMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
     }
     System.out.println(board);
-    // first step move, moves a chip in goal to different position in same goal area
+    // first step move: in goal area
     MoveWithPlayer m1 = new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(0, 3, 0, 1, WHITE_PLAYER);
-    board.setChip(m1);
-    board.setChip(m2);
-    System.out.println(board);
+    assertTrue("Should make step move that doesn't form cluster.", board.setChip(m1));
+    assertTrue("Should make step move that doesn't form cluster.", board.setChip(m2));
+    // second step move: other goal area
+    MoveWithPlayer m3 = new MoveWithPlayer(4, 7, 6, 7, BLACK_PLAYER);
+    MoveWithPlayer m4 = new MoveWithPlayer(7, 4, 7, 6, WHITE_PLAYER);
+    assertTrue("Should make step move that doesn't form cluster.", board.setChip(m3));
+    assertTrue("Should make step move that doesn't form cluster.", board.setChip(m4));
+    // third step move: non-goal area
+    MoveWithPlayer m5 = new MoveWithPlayer(4, 3, 3, 2, BLACK_PLAYER);
+    MoveWithPlayer m6 = new MoveWithPlayer(4, 4, 5, 3, WHITE_PLAYER);
+    assertTrue("Should make step move that doesn't form cluster.", board.setChip(m5));
+    assertTrue("Should make step move that doesn't form cluster.", board.setChip(m6));
 
   }
 
@@ -226,7 +239,7 @@ public class GameBoardTest {
 
   // test setChip() on illegal step and add moves.
   @Test
-  public void setChip_badMoveType() {
+  public void setChip_illegalMove() {
     GameBoard board = new GameBoard();
     // 9 black chips
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4} };
@@ -260,7 +273,7 @@ public class GameBoardTest {
   // of blackChipPositions field and explicitly run.
   @Ignore
   @Test
-  public void setChip_stepMovesUpdateChipPositionsListCorrectly() {
+  public void setChip_stepMovesUpdateChipPositionsList() {
     GameBoard board = new GameBoard();
     // 10 black chips
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4}, {2,4} };
@@ -281,36 +294,134 @@ public class GameBoardTest {
     assertEquals("chipPosition list should be correct.", expected, result);
   }
 
-  // test setChip() updates internal goal lists correctly. Remove private access
-  // of blackChipPositions field and explicitly run.
+  // test setChip() updates internal goal lists correctly for add moves. Remove private access
+  // of the 4 goal chip list fields and explicitly run.
   @Ignore
   @Test
-  public void setChip_stepMovesUpdateGoalListsCorrectly() {
+  public void setChip_addMovesUpdateGoalLists() {
     GameBoard board = new GameBoard();
     // 10 black chips
-    int[][] blackMoves = { {1,0}, {2,0}, {1,7}, {2,7}, {1,2}, {2,2}, {1,5}, {2,5}, {5,0}, {5,7} };
+    int[][] blackMoves = {{1, 0}, {2, 0}, {5, 0}, {6, 0}, {1, 7}, {2, 7}, {5, 7}, {6, 7}, {3, 2}, {4, 2}};
     for (int[] move : blackMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
     }
     // 10 white chips
-    int[][] whiteMoves = { {0,1}, {0,2}, {7,1}, {7,2}, {3,1}, {4,1}, {3,3}, {4,3}, {0,5}, {7,5} };
+    int[][] whiteMoves = {{0, 1}, {0, 2}, {0, 5}, {0, 6}, {7, 1}, {7, 2}, {7, 5}, {7, 6}, {5, 3}, {5, 4}};
     for (int[] move : whiteMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
     }
-    System.out.println(board);
-    // first step move, moves a chip in goal to different position in same goal area
-    MoveWithPlayer m1 = new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER);
-    MoveWithPlayer m2 = new MoveWithPlayer(0, 3, 0, 1, WHITE_PLAYER);
-    board.setChip(m1);
-    board.setChip(m2);
-    System.out.println(board);
-    String expected = "{ [2, 0] [4, 0] [5, 0] [1, 2] [2, 2] [4, 2] [5, 2] [1, 4] [4, 4] [5, 4] }";
-    String result = "{ ";
-    for (Integer[] square : board.blackChipPositions) {
-      result += Arrays.toString(square) + " ";
+
+    String expectedTop = "{ [1, 0] [2, 0] [5, 0] [6, 0] }";
+    String expectedBottom = "{ [1, 7] [2, 7] [5, 7] [6, 7] }";
+    String expectedLeft = "{ [0, 1] [0, 2] [0, 5] [0, 6] }";
+    String expectedRight = "{ [7, 1] [7, 2] [7, 5] [7, 6] }";
+    String[] expectedResults1 = {expectedTop, expectedBottom, expectedLeft, expectedRight};
+    String[] actualResults = new String[4];
+    Object[] goals1 = {board.chipsTopGoal, board.chipsBottomGoal, board.chipsLeftGoal, board.chipsRightGoal};
+    for (int i = 0; i < actualResults.length; i++) {
+      actualResults[i] = "{ ";
+      for (Integer[] square : (List<Integer[]>) goals1[i]) {
+        actualResults[i] += Arrays.toString(square) + " ";
+      }
+      actualResults[i] += "}";
+      assertEquals("goal chip list should be correct.", expectedResults1[i], actualResults[i]);
     }
-    result += "}";
-//    assertEquals("chipPosition list should be correct.", expected, result);
+  }
+
+  // test setChip() updates internal goal lists correctly for step moves. Remove private access
+  // of the 4 goal chip list fields and explicitly run.
+  @Ignore
+  @Test
+  public void setChip_stepMovesUpdateGoalLists() {
+    GameBoard board = new GameBoard();
+    // 10 black chips: 3 in top goal, 3 in bottom goal, 4 in non-goal
+    int[][] blackMoves = { {1,0}, {2,0}, {5,0}, {1,7}, {2,7}, {5,7}, {3,2}, {4,2}, {3,5}, {4,5} };
+    for (int[] move : blackMoves) {
+      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
+    }
+    // 10 white chips: 3 in top goal, 3 in bottom goal, 4 in non-goal
+    int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {7,1}, {7,2}, {7,5}, {2,3}, {2,4}, {5,3}, {5,4} };
+    for (int[] move : whiteMoves) {
+      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
+    }
+    // first step moves, moves a chip in goal to different position in same goal area
+    board.setChip(new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER));
+    board.setChip(new MoveWithPlayer(0, 6, 0, 5, WHITE_PLAYER));
+    board.setChip(new MoveWithPlayer(3, 7, 2, 7, BLACK_PLAYER));
+    board.setChip(new MoveWithPlayer(7, 3, 7, 2, WHITE_PLAYER));
+
+    String expectedTop = "{ [2, 0] [5, 0] [3, 0] }";
+    String expectedBottom = "{ [1, 7] [5, 7] [3, 7] }";
+    String expectedLeft = "{ [0, 1] [0, 2] [0, 6] }";
+    String expectedRight = "{ [7, 1] [7, 5] [7, 3] }";
+    String[] expectedResults1 = { expectedTop, expectedBottom, expectedLeft, expectedRight };
+    String[] actualResults = new String[4];
+    Object[] goals1 = { board.chipsTopGoal, board.chipsBottomGoal, board.chipsLeftGoal, board.chipsRightGoal};
+    for (int i = 0; i < actualResults.length; i++) {
+      actualResults[i] = "{ ";
+      for (Integer[] square : (List<Integer[]>) goals1[i]) {
+        actualResults[i] += Arrays.toString(square) + " ";
+      }
+      actualResults[i] += "}";
+      assertEquals("goal chip list should be correct.", expectedResults1[i], actualResults[i]);
+    }
+    // second step moves: 1. move chip from goal area to non-goal area, move chip from one goal area to other,
+    // 3. move chip from non-goal area to goal area, 4. move chip from non-goal area to non-goal area
+    board.setChip(new MoveWithPlayer(1, 1, 2, 0, BLACK_PLAYER)); // 1
+    board.setChip(new MoveWithPlayer(6, 7, 4, 2, BLACK_PLAYER)); // 2
+    board.setChip(new MoveWithPlayer(7, 6, 2, 3, WHITE_PLAYER)); // 3
+    board.setChip(new MoveWithPlayer(6, 1, 2, 4, WHITE_PLAYER)); // 4
+
+    expectedTop = "{ [5, 0] [3, 0] }";
+    expectedBottom = "{ [1, 7] [5, 7] [3, 7] [6, 7] }";
+    expectedLeft = "{ [0, 1] [0, 2] [0, 6] }";
+    expectedRight = "{ [7, 1] [7, 5] [7, 3] [7, 6] }";
+    String[] expectedResults2 = { expectedTop, expectedBottom, expectedLeft, expectedRight };
+    actualResults = new String[4];
+    Object[] goals2 = { board.chipsTopGoal, board.chipsBottomGoal, board.chipsLeftGoal, board.chipsRightGoal};
+    for (int i = 0; i < actualResults.length; i++) {
+      actualResults[i] = "{ ";
+      for (Integer[] square : (List<Integer[]>) goals2[i]) {
+        actualResults[i] += Arrays.toString(square) + " ";
+      }
+      actualResults[i] += "}";
+      assertEquals("goal chip list should be correct.", expectedResults2[i], actualResults[i]);
+    }
+    // third step moves: empty a goal list and add a chip back to it
+    board.setChip(new MoveWithPlayer(1, 6, 3, 0, BLACK_PLAYER));
+    board.setChip(new MoveWithPlayer(6, 5, 5, 0, BLACK_PLAYER));
+    board.setChip(new MoveWithPlayer(5, 0, 3, 2, BLACK_PLAYER));
+
+    expectedTop = "{ [5, 0] }";
+    String actualResult = "{ ";
+    for (Integer[] square : board.chipsTopGoal) {
+      actualResult += Arrays.toString(square) + " ";
+    }
+    actualResult += "}";
+    assertEquals("goal chip list should be correct.", expectedTop, actualResult);
+
+    System.out.println(board);
+
+  }
+
+
+
+  @Test
+  public void setChip_undoAddMoves() {
+    GameBoard board = new GameBoard();
+  }
+
+
+  @Test
+  public void setChip_undoStepMoves() {
+    GameBoard board = new GameBoard();
+
+  }
+
+  @Test
+  public void setChip_undoStepAndAddMoves() {
+    GameBoard board = new GameBoard();
+
   }
 
   // test getValidMoves() on an empty board.
@@ -319,35 +430,27 @@ public class GameBoardTest {
     GameBoard board = new GameBoard();
 
     List<MoveWithPlayer> player1ValidMoves = board.getValidMoves(WHITE_PLAYER);
-    ListNode<MoveWithPlayer> node = player1ValidMoves.front();
+    Iterator<MoveWithPlayer> iter1 = player1ValidMoves.iterator();
     for (int y = 1; y < BOARD_SIZE - 1; y++) {
       for (int x = 0; x < BOARD_SIZE; x++) {
-        MoveWithPlayer m = new MoveWithPlayer(x, y, WHITE_PLAYER);
-        if (node.isValidNode()) {
-          try {
-            assertEquals("Empty board does not return correct valid move for (" + x +
-                    "," + y + ")", m.toString(), node.item().toString());
-            node = node.next();
-          } catch (InvalidNodeException e) {
-            e.printStackTrace();
-          }
+        MoveWithPlayer expectedMove = new MoveWithPlayer(x, y, WHITE_PLAYER);
+        if (iter1.hasNext()) {
+          MoveWithPlayer move = iter1.next();
+          assertEquals("Empty board does not return correct valid move for (" + x + "," + y + ")",
+              expectedMove.toString(), move.toString());
         }
       }
     }
 
     List<MoveWithPlayer> player2ValidMoves = board.getValidMoves(BLACK_PLAYER);
-    node = player2ValidMoves.front();
+    Iterator<MoveWithPlayer> iter2 = player2ValidMoves.iterator();
     for (int y = 0; y < BOARD_SIZE; y++) {
       for (int x = 1; x < BOARD_SIZE - 1; x++) {
-        MoveWithPlayer m = new MoveWithPlayer(x, y, BLACK_PLAYER);
-        if (node.isValidNode()) {
-          try {
-            assertEquals("Empty board does not return correct valid move for (" + x +
-                "," + y + ")", m.toString(), node.item().toString());
-            node = node.next();
-          } catch (InvalidNodeException e) {
-            e.printStackTrace();
-          }
+        MoveWithPlayer expectedMove = new MoveWithPlayer(x, y, BLACK_PLAYER);
+        if (iter2.hasNext()) {
+          MoveWithPlayer move = iter2.next();
+          assertEquals("Empty board does not return correct valid move for (" + x + "," + y + ")",
+              expectedMove.toString(), move.toString());
         }
       }
     }
@@ -369,19 +472,15 @@ public class GameBoardTest {
         {5,5}, {7,5}, {0,6}, {2,6}, {3,6}, {4,6}, {5,6}, {6,6}, {7,6}};
 
     List<MoveWithPlayer> player1ValidMoves = board.getValidMoves(WHITE_PLAYER);
-    ListNode<MoveWithPlayer> node = player1ValidMoves.front();
+    Iterator<MoveWithPlayer> iter1 = player1ValidMoves.iterator();
     for (int[] move : whiteMoves) {
       int x = move[0];
       int y = move[1];
-      MoveWithPlayer m = new MoveWithPlayer(x, y, WHITE_PLAYER);
-      if (node.isValidNode()) {
-        try {
-          assertEquals("Partial filled board does not return correct valid move for (" +
-              x + "," + y + ")", m.toString(), node.item().toString());
-          node = node.next();
-        } catch (InvalidNodeException e) {
-          e.printStackTrace();
-        }
+      MoveWithPlayer actualMove = new MoveWithPlayer(x, y, WHITE_PLAYER);
+      if (iter1.hasNext()) {
+        MoveWithPlayer expectedMove = iter1.next();
+        assertEquals("Partial filled board does not return correct valid move for (" + x + "," + y + ")",
+            actualMove.toString(), expectedMove.toString());
       }
     }
 
@@ -389,19 +488,15 @@ public class GameBoardTest {
         {4,5}, {5,5}, {2,6}, {3,6}, {4,6}, {6,6}, {1,7}, {2,7}, {3,7}, {5,7}, {6,7} };
 
     List<MoveWithPlayer> player2ValidMoves = board.getValidMoves(BLACK_PLAYER);
-    node = player2ValidMoves.front();
+    Iterator<MoveWithPlayer> iter2 = player2ValidMoves.iterator();
     for (int[] move : blackMoves) {
       int x = move[0];
       int y = move[1];
-      MoveWithPlayer m = new MoveWithPlayer(x, y, BLACK_PLAYER);
-      if (node.isValidNode()) {
-        try {
-          assertEquals("Partial filled board does not return correct valid move for (" +
-              x + "," + y + ")", m.toString(), node.item().toString());
-          node = node.next();
-        } catch (InvalidNodeException e) {
-          e.printStackTrace();
-        }
+      MoveWithPlayer expectedMove = new MoveWithPlayer(x, y, BLACK_PLAYER);
+      if (iter2.hasNext()) {
+        MoveWithPlayer actualMove = iter2.next();
+        assertEquals("Partial filled board does not return correct valid move for (" + x + "," + y + ")",
+            expectedMove.toString(), actualMove.toString());
       }
     }
   }
@@ -424,17 +519,11 @@ public class GameBoardTest {
 
   // returns a string in the format "{ [x1, y1] [x2, y2] }" for a given List of connections
   private static String connectionToString(List<Integer[]> list) {
-    ListNode<Integer[]> node = list.front();
     StringBuilder sb = new StringBuilder(50);
     sb.append("{ ");
-    while (node.isValidNode()) {
-      try {
-        sb.append(Arrays.toString(node.item()));
-        sb.append(" ");
-        node = node.next();
-      } catch (InvalidNodeException e) {
-        e.printStackTrace();
-      }
+    for (Integer[] item : list) {
+      sb.append(Arrays.toString(item));
+      sb.append(" ");
     }
     sb.append("}");
     return sb.toString();
@@ -491,18 +580,18 @@ public class GameBoardTest {
       board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
     }
 
-    for (int i = 0; i < blackMoves.length; i++) {
-      int x = blackMoves[i][0];
-      int y = blackMoves[i][1];
+    for (int[] move : blackMoves) {
+      int x = move[0];
+      int y = move[1];
       List<Integer[]> connections = board.getConnections(BLACK_PLAYER, x, y);
       String result = connectionToString(connections);
       assertEquals("Should not be connections between chips in same goal area.",
           "{ }", result);
     }
 
-    for (int i = 0; i < whiteMoves.length; i++) {
-      int x = whiteMoves[i][0];
-      int y = whiteMoves[i][1];
+    for (int[] move : whiteMoves) {
+      int x = move[0];
+      int y = move[1];
       List<Integer[]> connections = board.getConnections(WHITE_PLAYER, x, y);
       String result = connectionToString(connections);
       assertEquals("Should not be connections between chips in same goal area.",
@@ -522,7 +611,7 @@ public class GameBoardTest {
     assertEquals("Should not be connections for a single chip.", "{ }", result);
   }
 
-  // test getConnections() on a chip with connections in all directions
+  // test getConnections() on a chip with connections in all directions.
   @Test
   public void getConnections_connectionInAllDirections() {
     GameBoard board = new GameBoard();
@@ -588,7 +677,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNoBottomGoalChip() {
+  public void hasValidNetwork_noBottomGoalChip() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, /*{5,7}*/ };
@@ -601,7 +690,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNoTopGoalChip() {
+  public void hasValidNetwork_noTopGoalChip() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { /*{2,0}, {6,0},*/ {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
@@ -614,7 +703,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNoTopOrBottomGoalChips() {
+  public void hasValidNetwork_noTopOrBottomGoalChips() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { /*{2,0}, {6,0},*/ {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}/*, {5,7}*/ };
@@ -627,7 +716,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNetwork1() {
+  public void hasValidNetwork_goodNetwork1() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
@@ -641,7 +730,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNetwork2() {
+  public void hasValidNetwork_goodNetwork2() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
@@ -655,7 +744,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardNetwork3() {
+  public void hasValidNetwork_goodNetwork3() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, /*{3,5},*/ {5,5}, {6,5}, {5,7} };
@@ -669,7 +758,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardAllChipsFormNetwork() {
+  public void hasValidNetwork_allChipsFormNetwork() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { /*{2,0},*/ {6,0}, /*{4,2}, {1,3},*/ {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
@@ -683,7 +772,7 @@ public class GameBoardTest {
 
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
-  public void hasValidNetwork_partialBoardShortOneChip() {
+  public void hasValidNetwork_shortOneChipNoNetwork() {
     GameBoard board = new GameBoard();
 
     int[][] moves = { /*{2,0},*/ {6,0}, /*{4,2}, {1,3}, {3,3}, {2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
@@ -691,7 +780,6 @@ public class GameBoardTest {
       board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
     }
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
-    // 60 - 65 - 55 - 33 - 35 - 57
-    assertFalse("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
+    assertFalse("Board should not have a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
 }

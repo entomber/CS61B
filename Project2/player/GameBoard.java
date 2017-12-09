@@ -27,10 +27,10 @@ public class GameBoard {
    * blackChipPositions is an int[][] of the black chip positions on the board.
    * whiteChipCount is the index of the next empty spot in whiteChipPositions, 10 if full.
    * blackChipCount is the index of the next empty spot in blackChipPositions, 10 if full.
-   * whiteChipsLeftGoal is a List of white chips in the left white goal area.
-   * whiteChipsRightGoal is a List of white chips in the right white goal area.
-   * blackChipsTopGoal is a List of black chips in the top black goal area.
-   * blackChipsBottomGoal is a List of black chips in the bottom black goal area.
+   * chipsLeftGoal is a List of white chips in the left white goal area.
+   * chipsRightGoal is a List of white chips in the right white goal area.
+   * chipsTopGoal is a List of black chips in the top black goal area.
+   * chipsBottomGoal is a List of black chips in the bottom black goal area.
    *
    */
   private final static int BLACK_PLAYER = 0;
@@ -55,10 +55,10 @@ public class GameBoard {
    List<Integer[]> blackChipPositions;
   private int whiteChipCount;
   private int blackChipCount;
-  private List<Integer[]> whiteChipsLeftGoal;
-  private List<Integer[]> whiteChipsRightGoal;
-  private List<Integer[]> blackChipsTopGoal;
-  private List<Integer[]> blackChipsBottomGoal;
+   List<Integer[]> chipsLeftGoal;
+   List<Integer[]> chipsRightGoal;
+   List<Integer[]> chipsTopGoal;
+   List<Integer[]> chipsBottomGoal;
   private List<MoveWithPlayer> whiteMoves;
   private List<MoveWithPlayer> blackMoves;
 
@@ -75,10 +75,10 @@ public class GameBoard {
     blackChipPositions = new DList<Integer[]>();
     whiteChipCount = 0;
     blackChipCount = 0;
-    whiteChipsLeftGoal = new DList<Integer[]>();
-    whiteChipsRightGoal = new DList<Integer[]>();
-    blackChipsTopGoal = new DList<Integer[]>();
-    blackChipsBottomGoal = new DList<Integer[]>();
+    chipsLeftGoal = new DList<Integer[]>();
+    chipsRightGoal = new DList<Integer[]>();
+    chipsTopGoal = new DList<Integer[]>();
+    chipsBottomGoal = new DList<Integer[]>();
     whiteMoves = new DList<MoveWithPlayer>();
     blackMoves = new DList<MoveWithPlayer>();
   }
@@ -119,14 +119,13 @@ public class GameBoard {
           break;
         }
       }
-      // if old chip position is in goal list, remove it from respective list
+      // if old chip position is in goal list, remove it from respective goal list
       removeChipIfInGoal(move.x2, move.y2);
       board[move.x2][move.y2] = NO_CHIP;
       board[move.x1][move.y1] = chipColor;
     }
     // add move
     else {
-      // what if chip we removed is in goal list?
       board[move.x1][move.y1] = chipColor;
       if (move.player == WHITE_PLAYER) {
         whiteChipCount++;
@@ -137,13 +136,13 @@ public class GameBoard {
     Integer[] square = { move.x1, move.y1 };
     // add to goal chip list
     if (inLeftGoal(move.x1, move.y1)) {
-      whiteChipsLeftGoal.insertBack(square);
+      chipsLeftGoal.insertBack(square);
     } else if (inRightGoal(move.x1, move.y1)) {
-      whiteChipsRightGoal.insertBack(square);
+      chipsRightGoal.insertBack(square);
     } else if (inTopGoal(move.x1, move.y1)) {
-      blackChipsTopGoal.insertBack(square);
+      chipsTopGoal.insertBack(square);
     } else if (inBottomGoal(move.x1, move.y1)) {
-      blackChipsBottomGoal.insertBack(square);
+      chipsBottomGoal.insertBack(square);
     }
     // add chip to chipPositions
     chipPositions.insertBack(square);
@@ -156,6 +155,18 @@ public class GameBoard {
     return true;
   }
 
+  /**
+   *  undoSetChip() undoes the last setChip() for the given player.  It returns false if there was no chip
+   *  successfully set for the player prior.
+   *
+   *  Unusual conditions:
+   *   - if player is neither WHITE_PLAYER or BLACK_PLAYER, throws IllegalArgumentException.
+   *
+   *  @param player is WHITE_PLAYER or BLACK_PLAYER.
+   *  @return true if move was valid and completed, false otherwise.
+   *
+   *  Performance: runs in O(1) time.
+   */
   protected boolean undoSetChip(int player) {
     List<MoveWithPlayer> moves;
     int chipColor;
@@ -192,7 +203,7 @@ public class GameBoard {
       board[lastMove.x2][lastMove.y2] = chipColor;
     }
     // add moves
-    if (lastMove.moveKind == Move.ADD) {
+    else if (lastMove.moveKind == Move.ADD) {
       if (lastMove.player == WHITE_PLAYER) {
         whiteChipCount--;
       } else {
@@ -209,7 +220,7 @@ public class GameBoard {
   private void removeChipIfInGoal(int x, int y) {
     // if in left goal area, remove from left goal chip list
     if (inLeftGoal(x, y)) {
-      Iterator<Integer[]> iter = whiteChipsLeftGoal.iterator();
+      Iterator<Integer[]> iter = chipsLeftGoal.iterator();
       while (iter.hasNext()) {
         Integer[] goalSquare = iter.next();
         if (x == goalSquare[0] && y == goalSquare[1]) {
@@ -220,7 +231,7 @@ public class GameBoard {
     }
     // if in right goal area, remove from right goal chip list
     else if (inRightGoal(x, y)) {
-      Iterator<Integer[]> iter = whiteChipsRightGoal.iterator();
+      Iterator<Integer[]> iter = chipsRightGoal.iterator();
       while (iter.hasNext()) {
         Integer[] goalSquare = iter.next();
         if (x == goalSquare[0] && y == goalSquare[1]) {
@@ -231,7 +242,7 @@ public class GameBoard {
     }
     // if in top goal area, remove from top goal chip list
     else if (inTopGoal(x, y)) {
-      Iterator<Integer[]> iter = blackChipsTopGoal.iterator();
+      Iterator<Integer[]> iter = chipsTopGoal.iterator();
       while (iter.hasNext()) {
         Integer[] goalSquare = iter.next();
         if (x == goalSquare[0] && y == goalSquare[1]) {
@@ -242,7 +253,7 @@ public class GameBoard {
     }
     // if in bottom goal area, remove from bottom goal chip list
     else if (inBottomGoal(x, y)) {
-      Iterator<Integer[]> iter = blackChipsBottomGoal.iterator();
+      Iterator<Integer[]> iter = chipsBottomGoal.iterator();
       while (iter.hasNext()) {
         Integer[] goalSquare = iter.next();
         if (x == goalSquare[0] && y == goalSquare[1]) {
@@ -286,8 +297,8 @@ public class GameBoard {
       return false;
     }
     // No clusters of three or more chips of the same color.
-    if (move.player == WHITE_PLAYER && neighboringChips(WHITE_CHIP, move.x1, move.y1, -1, -1) > 2 ||
-        move.player == BLACK_PLAYER && neighboringChips(BLACK_CHIP, move.x1, move.y1, -1, -1) > 2) {
+    if (move.player == WHITE_PLAYER && neighboringChips(WHITE_CHIP, move.x1, move.y1, -1, -1, move.x2, move.y2) > 2 ||
+        move.player == BLACK_PLAYER && neighboringChips(BLACK_CHIP, move.x1, move.y1, -1, -1, move.x2, move.y2) > 2) {
       return false;
     }
     // Player attempting step move when they have less than 10 chips on the board.
@@ -519,12 +530,12 @@ public class GameBoard {
     List<Integer[]> chipsInSecondGoal;
     if (player == WHITE_PLAYER) {
       chipPositions = whiteChipPositions;
-      chipsInFirstGoal = whiteChipsLeftGoal;
-      chipsInSecondGoal = whiteChipsRightGoal;
+      chipsInFirstGoal = chipsLeftGoal;
+      chipsInSecondGoal = chipsRightGoal;
     } else {
       chipPositions = blackChipPositions;
-      chipsInFirstGoal = blackChipsTopGoal;
-      chipsInSecondGoal = blackChipsBottomGoal;
+      chipsInFirstGoal = chipsTopGoal;
+      chipsInSecondGoal = chipsBottomGoal;
     }
     // network consists of 6 or more chips
     if ((player == WHITE_PLAYER && whiteChipCount < 6) || (player == BLACK_PLAYER && blackChipCount < 6)) {
@@ -678,16 +689,18 @@ public class GameBoard {
     return (x > 0 && x < BOARD_SIZE - 1) && (y > 0 && y < BOARD_SIZE - 1);
   }
 
-  // return the count of all chips connected to this chip (including this chip)
-  private int neighboringChips(int chipColor, int x, int y, int xPrev, int yPrev) {
+  // return the count of all chips connected to this chip at x,y (excluding chip at excludeX, excludeY).
+  // prevX, prevY is the chip checked before the current call.
+  private int neighboringChips(int chipColor, int x, int y, int prevX, int prevY, int excludeX, int excludeY) {
     int count = 1; // 1 for chip at x, y
 
     // non-border area
     if (inNonBorder(x, y)) {
       for (int j = y-1; j <= y+1; j++) {
         for (int i = x-1; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
-            count += neighboringChips(chipColor, i, j, x, y);
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == prevX && j == prevY) &&
+              !(i == excludeX && j == excludeY)) {
+            count += neighboringChips(chipColor, i, j, x, y, excludeX, excludeY);
           }
         }
       }
@@ -696,8 +709,9 @@ public class GameBoard {
     else if (inTopGoal(x, y)) {
       for (int j = y; j <= y+1; j++) {
         for (int i = x-1; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
-            count += neighboringChips(chipColor, i, j, x, y);
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == prevX && j == prevY) &&
+              !(i == excludeX && j == excludeY)) {
+            count += neighboringChips(chipColor, i, j, x, y, excludeX, excludeY);
           }
         }
       }
@@ -706,8 +720,9 @@ public class GameBoard {
     else if (inBottomGoal(x, y)) {
       for (int j = y-1; j <= y; j++) {
         for (int i = x-1; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
-            count += neighboringChips(chipColor, i, j, x, y);
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == prevX && j == prevY) &&
+              !(i == excludeX && j == excludeY)) {
+            count += neighboringChips(chipColor, i, j, x, y, excludeX, excludeY);
           }
         }
       }
@@ -716,8 +731,9 @@ public class GameBoard {
     else if (inLeftGoal(x, y)) {
       for (int j = y-1; j <= y+1; j++) {
         for (int i = x; i <= x+1; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
-            count += neighboringChips(chipColor, i, j, x, y);
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == prevX && j == prevY) &&
+              !(i == excludeX && j == excludeY)) {
+            count += neighboringChips(chipColor, i, j, x, y, excludeX, excludeY);
           }
         }
       }
@@ -726,8 +742,9 @@ public class GameBoard {
     else if (inRightGoal(x, y)) {
       for (int j = y-1; j <= y+1; j++) {
         for (int i = x-1; i <= x; i++) {
-          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == xPrev && j == yPrev)) {
-            count += neighboringChips(chipColor, i, j, xPrev, yPrev);
+          if (board[i][j] == chipColor && !(i == x && j == y) && !(i == prevX && j == prevY) &&
+              !(i == excludeX && j == excludeY)) {
+            count += neighboringChips(chipColor, i, j, x, y, excludeX, excludeY);
           }
         }
       }
