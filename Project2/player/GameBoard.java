@@ -6,7 +6,10 @@ import DataStructures.Graph.SymbolGraph;
 import DataStructures.List.InvalidNodeException;
 import DataStructures.List.List;
 import DataStructures.List.DList;
+import DataStructures.Stack.Stack;
 import DataStructures.dict.HashTableChained;
+
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class GameBoard {
@@ -25,8 +28,8 @@ public class GameBoard {
    * board is the internal representation of the game board.
    * whiteChipPositions is an int[][] of the white chip positions on the board.
    * blackChipPositions is an int[][] of the black chip positions on the board.
-   * whiteChipCount is the index of the next empty spot in whiteChipPositions, 10 if full.
-   * blackChipCount is the index of the next empty spot in blackChipPositions, 10 if full.
+   * whiteChipCount is the number of white chips on the board.
+   * blackChipCount is the number of black chips on the board.
    * chipsLeftGoal is a List of white chips in the left white goal area.
    * chipsRightGoal is a List of white chips in the right white goal area.
    * chipsTopGoal is a List of black chips in the top black goal area.
@@ -51,16 +54,16 @@ public class GameBoard {
   final static int DIR_UP_LEFT = -DIR_DOWN_RIGHT;
 
   private int[][] board;
-   List<Integer[]> whiteChipPositions;
-   List<Integer[]> blackChipPositions;
+  private List<Integer[]> whiteChipPositions;
+  private List<Integer[]> blackChipPositions;
   private int whiteChipCount;
   private int blackChipCount;
-   List<Integer[]> chipsLeftGoal;
-   List<Integer[]> chipsRightGoal;
-   List<Integer[]> chipsTopGoal;
-   List<Integer[]> chipsBottomGoal;
-  private List<MoveWithPlayer> whiteMoves;
-  private List<MoveWithPlayer> blackMoves;
+  private List<Integer[]> chipsLeftGoal;
+  private List<Integer[]> chipsRightGoal;
+  private List<Integer[]> chipsTopGoal;
+  private List<Integer[]> chipsBottomGoal;
+  private Stack<MoveWithPlayer> whiteMoves;
+  private Stack<MoveWithPlayer> blackMoves;
 
   /**
    *  Creates a new game board
@@ -79,8 +82,8 @@ public class GameBoard {
     chipsRightGoal = new DList<Integer[]>();
     chipsTopGoal = new DList<Integer[]>();
     chipsBottomGoal = new DList<Integer[]>();
-    whiteMoves = new DList<MoveWithPlayer>();
-    blackMoves = new DList<MoveWithPlayer>();
+    whiteMoves = new Stack<MoveWithPlayer>();
+    blackMoves = new Stack<MoveWithPlayer>();
   }
 
   /**
@@ -148,9 +151,9 @@ public class GameBoard {
     chipPositions.insertBack(square);
     // save move data for undo
     if (move.player == WHITE_PLAYER) {
-      whiteMoves.insertBack(move);
+      whiteMoves.push(move);
     } else {
-      blackMoves.insertBack(move);
+      blackMoves.push(move);
     }
     return true;
   }
@@ -168,7 +171,7 @@ public class GameBoard {
    *  Performance: runs in O(1) time.
    */
   protected boolean undoSetChip(int player) {
-    List<MoveWithPlayer> moves;
+    Stack<MoveWithPlayer> moves;
     int chipColor;
     List<Integer[]> chipPositions;
     if (player == WHITE_PLAYER) {
@@ -184,15 +187,15 @@ public class GameBoard {
     if (moves.length() == 0) {
       return false;
     }
-    // save reference to last move and remove it from moves list
-    // also remove last chip from chipPositions which was the last added chip
-    MoveWithPlayer lastMove = null;
-    try {
-      lastMove = moves.back().item();
-      moves.back().remove();
-      chipPositions.back().remove();
-    } catch (InvalidNodeException e) {
-      e.printStackTrace();
+    // save reference to last move and remove it from moves list and remove chip from chipPositions
+    MoveWithPlayer lastMove = moves.pop();
+    Iterator<Integer[]> iter = chipPositions.iterator();
+    while (iter.hasNext()) {
+      Integer[] square = iter.next();
+      if (lastMove.x1 == square[0] && lastMove.y1 == square[1]) {
+        iter.remove();
+        break;
+      }
     }
     // step moves
     if (lastMove.moveKind == Move.STEP) {
@@ -201,9 +204,19 @@ public class GameBoard {
       chipPositions.insertBack(square);
       board[lastMove.x1][lastMove.y1] = NO_CHIP;
       board[lastMove.x2][lastMove.y2] = chipColor;
+      // add to goal chip list
+      if (inLeftGoal(lastMove.x2, lastMove.y2)) {
+        chipsLeftGoal.insertBack(square);
+      } else if (inRightGoal(lastMove.x2, lastMove.y2)) {
+        chipsRightGoal.insertBack(square);
+      } else if (inTopGoal(lastMove.x2, lastMove.y2)) {
+        chipsTopGoal.insertBack(square);
+      } else if (inBottomGoal(lastMove.x2, lastMove.y2)) {
+        chipsBottomGoal.insertBack(square);
+      }
     }
     // add moves
-    else if (lastMove.moveKind == Move.ADD) {
+    else {
       if (lastMove.player == WHITE_PLAYER) {
         whiteChipCount--;
       } else {
@@ -277,6 +290,10 @@ public class GameBoard {
   private boolean isValidMove(MoveWithPlayer move) {
     // move.player should be WHITE_PLAYER or BLACK_PLAYER.
     if (move.player != WHITE_PLAYER && move.player != BLACK_PLAYER) {
+      return false;
+    }
+    // move.moveKind should be add or step move.
+    if (move.moveKind != Move.ADD && move.moveKind != Move.STEP) {
       return false;
     }
     // No chip may be placed outside game board.
@@ -612,6 +629,35 @@ public class GameBoard {
     }
     return firstGoal && secondGoal;
   }
+
+  /**
+   *  chipLists() returns a String representation of the internal chip lists.
+   *
+   *  @return a String representation of chip lists: white, black, top goal, bottom goal, left goal, and right goal.
+   *
+   *  Performance: runs in O(1) time.
+   */
+  public String chipListsToString() {
+    StringBuilder sb = new StringBuilder(100);
+    Object[] chipLists = { whiteChipPositions, blackChipPositions, chipsTopGoal, chipsBottomGoal,
+        chipsLeftGoal, chipsRightGoal };
+    String[] listNames = { "White", "Black", "Top", "Bottom", "Left", "Right" };
+    for (int i = 0; i < chipLists.length; i++) {
+      List<Integer[]> list  = ((List<Integer[]>) chipLists[i]);
+      sb.append(listNames[i]);
+      sb.append(": { ");
+      for (Integer[] chip : list) {
+        sb.append(Arrays.toString(chip));
+        sb.append(" ");
+      }
+      sb.append("}");
+      if (i != chipLists.length - 1) {
+        sb.append("\n");
+      }
+    }
+    return sb.toString();
+  }
+
 
   /**
    *  toString() returns a String representation of this GameBoard.

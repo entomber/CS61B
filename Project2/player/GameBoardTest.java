@@ -1,14 +1,9 @@
 package player;
 
-
-import DataStructures.List.DList;
-import DataStructures.List.InvalidNodeException;
 import DataStructures.List.List;
-import DataStructures.List.ListNode;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -58,12 +53,12 @@ public class GameBoardTest {
 
     assertFalse("Should not set white chip in corner (" + m1.x1 + "," + m1.y1 + ").", board.setChip(m1));
     assertFalse("Should not set white chip in corner (" + m2.x1 + "," + m2.y1 + ").", board.setChip(m2));
-    assertFalse("Should not set white chip in corner (" + m3.x1 + "," + m3.y1 + ").", board.setChip( m3));
+    assertFalse("Should not set white chip in corner (" + m3.x1 + "," + m3.y1 + ").", board.setChip(m3));
     assertFalse("Should not set white chip in corner (" + m4.x1 + "," + m4.y1 + ").", board.setChip(m4));
-    assertFalse("Should not set black chip in corner (" + m1.x1 + "," + m1.y1 + ").", board.setChip(m1));
-    assertFalse("Should not set black chip in corner (" + m2.x1 + "," + m2.y1 + ").", board.setChip(m2));
-    assertFalse("Should not set black chip in corner (" + m3.x1 + "," + m3.y1 + ").", board.setChip(m3));
-    assertFalse("Should not set black chip in corner (" + m4.x1 + "," + m4.y1 + ").", board.setChip(m4));
+    assertFalse("Should not set black chip in corner (" + m1.x1 + "," + m1.y1 + ").", board.setChip(m5));
+    assertFalse("Should not set black chip in corner (" + m2.x1 + "," + m2.y1 + ").", board.setChip(m6));
+    assertFalse("Should not set black chip in corner (" + m3.x1 + "," + m3.y1 + ").", board.setChip(m7));
+    assertFalse("Should not set black chip in corner (" + m4.x1 + "," + m4.y1 + ").", board.setChip(m8));
   }
 
   // test setChip() on a move to the wrong goal.
@@ -269,9 +264,7 @@ public class GameBoardTest {
     assertFalse("Should not add move with 10 chips on the board.", board.setChip(m4));
   }
 
-  // test setChip() updates internal white/blackChipPositions list correctly. Remove private access
-  // of blackChipPositions field and explicitly run.
-  @Ignore
+  // test setChip() updates internal white/blackChipPositions list correctly.
   @Test
   public void setChip_stepMovesUpdateChipPositionsList() {
     GameBoard board = new GameBoard();
@@ -285,18 +278,15 @@ public class GameBoardTest {
     MoveWithPlayer m2 = new MoveWithPlayer(5, 4, 2, 4, BLACK_PLAYER);
     board.setChip(m1);
     board.setChip(m2);
-    String expected = "{ [2, 0] [4, 0] [5, 0] [1, 2] [2, 2] [4, 2] [5, 2] [1, 4] [4, 4] [5, 4] }";
-    String result = "{ ";
-    for (Integer[] square : board.blackChipPositions) {
-      result += Arrays.toString(square) + " ";
-    }
-    result += "}";
-    assertEquals("chipPosition list should be correct.", expected, result);
+
+    String[] expectedResults = { "White: { }",
+        "Black: { [2, 0] [4, 0] [5, 0] [1, 2] [2, 2] [4, 2] [5, 2] [1, 4] [4, 4] [5, 4] }",
+        "Top: { [2, 0] [4, 0] [5, 0] }", "Bottom: { }", "Left: { }", "Right: { }" };
+    assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
+        board.chipListsToString());
   }
 
-  // test setChip() updates internal goal lists correctly for add moves. Remove private access
-  // of the 4 goal chip list fields and explicitly run.
-  @Ignore
+  // test setChip() updates internal goal lists correctly for add moves.
   @Test
   public void setChip_addMovesUpdateGoalLists() {
     GameBoard board = new GameBoard();
@@ -311,26 +301,15 @@ public class GameBoardTest {
       board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
     }
 
-    String expectedTop = "{ [1, 0] [2, 0] [5, 0] [6, 0] }";
-    String expectedBottom = "{ [1, 7] [2, 7] [5, 7] [6, 7] }";
-    String expectedLeft = "{ [0, 1] [0, 2] [0, 5] [0, 6] }";
-    String expectedRight = "{ [7, 1] [7, 2] [7, 5] [7, 6] }";
-    String[] expectedResults1 = {expectedTop, expectedBottom, expectedLeft, expectedRight};
-    String[] actualResults = new String[4];
-    Object[] goals1 = {board.chipsTopGoal, board.chipsBottomGoal, board.chipsLeftGoal, board.chipsRightGoal};
-    for (int i = 0; i < actualResults.length; i++) {
-      actualResults[i] = "{ ";
-      for (Integer[] square : (List<Integer[]>) goals1[i]) {
-        actualResults[i] += Arrays.toString(square) + " ";
-      }
-      actualResults[i] += "}";
-      assertEquals("goal chip list should be correct.", expectedResults1[i], actualResults[i]);
-    }
+    String[] expectedResults = { "White: { [0, 1] [0, 2] [0, 5] [0, 6] [7, 1] [7, 2] [7, 5] [7, 6] [5, 3] [5, 4] }",
+        "Black: { [1, 0] [2, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 2] }",
+        "Top: { [1, 0] [2, 0] [5, 0] [6, 0] }", "Bottom: { [1, 7] [2, 7] [5, 7] [6, 7] }",
+        "Left: { [0, 1] [0, 2] [0, 5] [0, 6] }", "Right: { [7, 1] [7, 2] [7, 5] [7, 6] }"};
+    assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
+        board.chipListsToString());
   }
 
-  // test setChip() updates internal goal lists correctly for step moves. Remove private access
-  // of the 4 goal chip list fields and explicitly run.
-  @Ignore
+  // test setChip() updates internal goal lists correctly for step moves.
   @Test
   public void setChip_stepMovesUpdateGoalLists() {
     GameBoard board = new GameBoard();
@@ -339,7 +318,7 @@ public class GameBoardTest {
     for (int[] move : blackMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
     }
-    // 10 white chips: 3 in top goal, 3 in bottom goal, 4 in non-goal
+    // 10 white chips: 3 in left goal, 3 in right goal, 4 in non-goal
     int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {7,1}, {7,2}, {7,5}, {2,3}, {2,4}, {5,3}, {5,4} };
     for (int[] move : whiteMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
@@ -350,21 +329,12 @@ public class GameBoardTest {
     board.setChip(new MoveWithPlayer(3, 7, 2, 7, BLACK_PLAYER));
     board.setChip(new MoveWithPlayer(7, 3, 7, 2, WHITE_PLAYER));
 
-    String expectedTop = "{ [2, 0] [5, 0] [3, 0] }";
-    String expectedBottom = "{ [1, 7] [5, 7] [3, 7] }";
-    String expectedLeft = "{ [0, 1] [0, 2] [0, 6] }";
-    String expectedRight = "{ [7, 1] [7, 5] [7, 3] }";
-    String[] expectedResults1 = { expectedTop, expectedBottom, expectedLeft, expectedRight };
-    String[] actualResults = new String[4];
-    Object[] goals1 = { board.chipsTopGoal, board.chipsBottomGoal, board.chipsLeftGoal, board.chipsRightGoal};
-    for (int i = 0; i < actualResults.length; i++) {
-      actualResults[i] = "{ ";
-      for (Integer[] square : (List<Integer[]>) goals1[i]) {
-        actualResults[i] += Arrays.toString(square) + " ";
-      }
-      actualResults[i] += "}";
-      assertEquals("goal chip list should be correct.", expectedResults1[i], actualResults[i]);
-    }
+    String[] expectedResults = { "White: { [0, 1] [0, 2] [7, 1] [7, 5] [2, 3] [2, 4] [5, 3] [5, 4] [0, 6] [7, 3] }",
+        "Black: { [2, 0] [5, 0] [1, 7] [5, 7] [3, 2] [4, 2] [3, 5] [4, 5] [3, 0] [3, 7] }",
+        "Top: { [2, 0] [5, 0] [3, 0] }", "Bottom: { [1, 7] [5, 7] [3, 7] }",
+        "Left: { [0, 1] [0, 2] [0, 6] }", "Right: { [7, 1] [7, 5] [7, 3] }" };
+    assertEquals("Chip list should be correct.", String.join("\n", expectedResults),
+        board.chipListsToString());
     // second step moves: 1. move chip from goal area to non-goal area, move chip from one goal area to other,
     // 3. move chip from non-goal area to goal area, 4. move chip from non-goal area to non-goal area
     board.setChip(new MoveWithPlayer(1, 1, 2, 0, BLACK_PLAYER)); // 1
@@ -372,56 +342,100 @@ public class GameBoardTest {
     board.setChip(new MoveWithPlayer(7, 6, 2, 3, WHITE_PLAYER)); // 3
     board.setChip(new MoveWithPlayer(6, 1, 2, 4, WHITE_PLAYER)); // 4
 
-    expectedTop = "{ [5, 0] [3, 0] }";
-    expectedBottom = "{ [1, 7] [5, 7] [3, 7] [6, 7] }";
-    expectedLeft = "{ [0, 1] [0, 2] [0, 6] }";
-    expectedRight = "{ [7, 1] [7, 5] [7, 3] [7, 6] }";
-    String[] expectedResults2 = { expectedTop, expectedBottom, expectedLeft, expectedRight };
-    actualResults = new String[4];
-    Object[] goals2 = { board.chipsTopGoal, board.chipsBottomGoal, board.chipsLeftGoal, board.chipsRightGoal};
-    for (int i = 0; i < actualResults.length; i++) {
-      actualResults[i] = "{ ";
-      for (Integer[] square : (List<Integer[]>) goals2[i]) {
-        actualResults[i] += Arrays.toString(square) + " ";
-      }
-      actualResults[i] += "}";
-      assertEquals("goal chip list should be correct.", expectedResults2[i], actualResults[i]);
-    }
+    expectedResults[0] = "White: { [0, 1] [0, 2] [7, 1] [7, 5] [5, 3] [5, 4] [0, 6] [7, 3] [7, 6] [6, 1] }";
+    expectedResults[1] = "Black: { [5, 0] [1, 7] [5, 7] [3, 2] [3, 5] [4, 5] [3, 0] [3, 7] [1, 1] [6, 7] }";
+    expectedResults[2] = "Top: { [5, 0] [3, 0] }";
+    expectedResults[3] = "Bottom: { [1, 7] [5, 7] [3, 7] [6, 7] }";
+    expectedResults[4] = "Left: { [0, 1] [0, 2] [0, 6] }";
+    expectedResults[5] = "Right: { [7, 1] [7, 5] [7, 3] [7, 6] }";
+    assertEquals("Chip list should be correct.", String.join("\n", expectedResults),
+        board.chipListsToString());
+
     // third step moves: empty a goal list and add a chip back to it
     board.setChip(new MoveWithPlayer(1, 6, 3, 0, BLACK_PLAYER));
     board.setChip(new MoveWithPlayer(6, 5, 5, 0, BLACK_PLAYER));
     board.setChip(new MoveWithPlayer(5, 0, 3, 2, BLACK_PLAYER));
 
-    expectedTop = "{ [5, 0] }";
-    String actualResult = "{ ";
-    for (Integer[] square : board.chipsTopGoal) {
-      actualResult += Arrays.toString(square) + " ";
+    expectedResults[1] = "Black: { [1, 7] [5, 7] [3, 5] [4, 5] [3, 7] [1, 1] [6, 7] [1, 6] [6, 5] [5, 0] }";
+    expectedResults[2] = "Top: { [5, 0] }";
+    assertEquals("Chip list should be correct.", String.join("\n", expectedResults),
+        board.chipListsToString());
+  }
+
+  // test undoSetChip() before any moves have been made.
+  @Test
+  public void undoSetChip_noMoves() {
+    GameBoard board = new GameBoard();
+    assertFalse("Should not undo move when none has been made.", board.undoSetChip(BLACK_PLAYER));
+    assertFalse("Should not undo move when none has been made.", board.undoSetChip(WHITE_PLAYER));
+  }
+
+  // test undoSetChip() after some add moves made.
+  @Test
+  public void undoSetChip_undoAddMoves() {
+    GameBoard board = new GameBoard();
+
+    // 3 moves to right goal
+    Integer[][] moves = { {7,1}, {7,2}, {7,4} };
+
+    MoveWithPlayer m1 = new MoveWithPlayer(moves[0][0], moves[0][1], WHITE_PLAYER);
+    board.setChip(m1);
+    assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
+    String[] expectedResults = { "White: { }", "Black: { }", "Top: { }", "Bottom: { }", "Left: { }", "Right: { }" };
+    assertEquals("All chip lists should be empty", String.join("\n", expectedResults),
+        board.chipListsToString());
+
+    MoveWithPlayer m2 = new MoveWithPlayer(moves[1][0], moves[1][1], WHITE_PLAYER);
+    board.setChip(m2);
+    assertFalse("Should not undo move when none has been made.", board.undoSetChip(BLACK_PLAYER));
+
+    MoveWithPlayer m3 = new MoveWithPlayer(moves[2][0], moves[2][1], WHITE_PLAYER);
+    board.setChip(m3);
+    assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
+    expectedResults[0] = "White: { [7, 2] }";
+    expectedResults[5] = "Right: { [7, 2] }";
+    assertEquals("Only m2 should be in the chip lists.", String.join("\n", expectedResults),
+        board.chipListsToString());
+
+    assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
+  }
+
+  // test undoStepChip() after some step moves made and at boundary between step and add moves.
+  @Test
+  public void undoSetChip_undoStepMoves() {
+    GameBoard board = new GameBoard();
+    // 10 black chips
+    int[][] addMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
+    for (int[] move : addMoves) {
+      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
     }
-    actualResult += "}";
-    assertEquals("goal chip list should be correct.", expectedTop, actualResult);
+    int[][] stepMoves = { {4,3,4,2}, {3,0,2,0} };
+    for (int[] move : stepMoves) {
+      board.setChip(new MoveWithPlayer(move[0], move[1], move[2], move[3], BLACK_PLAYER));
+    }
 
-    System.out.println(board);
+    String[] expectedResults = { "White: { }",
+        "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 3] [3, 0] }",
+        "Top: { [1, 0] [5, 0] [6, 0] [3, 0] }", "Bottom: { [1, 7] [2, 7] [5, 7] [6, 7] }",
+        "Left: { }", "Right: { }" };
+    assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
+    board.chipListsToString());
 
-  }
+    board.undoSetChip(BLACK_PLAYER);
+    expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 3] [2, 0] }";
+    expectedResults[2] = "Top: { [1, 0] [5, 0] [6, 0] [2, 0] }";
+    assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
+        board.chipListsToString());
 
+    board.undoSetChip(BLACK_PLAYER);
+    expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [2, 0] [4, 2] }";
+    assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
+        board.chipListsToString());
 
-
-  @Test
-  public void setChip_undoAddMoves() {
-    GameBoard board = new GameBoard();
-  }
-
-
-  @Test
-  public void setChip_undoStepMoves() {
-    GameBoard board = new GameBoard();
-
-  }
-
-  @Test
-  public void setChip_undoStepAndAddMoves() {
-    GameBoard board = new GameBoard();
-
+    board.undoSetChip(BLACK_PLAYER);
+    expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [2, 0] }";
+    assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
+        board.chipListsToString());
   }
 
   // test getValidMoves() on an empty board.
