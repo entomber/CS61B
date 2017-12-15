@@ -2,26 +2,25 @@
 
 package player;
 
-import DataStructures.List.List;
-import DataStructures.List.ListNode;
-import DataStructures.List.InvalidNodeException;
-
 /**
  * An implementation of an automatic Network player.  Keeps track of moves
  * made by both players.  Can select a move for itself.
  */
 public class MachinePlayer extends Player {
 
-  private final static int BLACK_PLAYER = 0;
-  private final static int WHITE_PLAYER = 1;
+  public final static int BLACK_PLAYER = 0;
+  public final static int WHITE_PLAYER = 1;
 
   private int color;
   private int searchDepth;
+  private int searchDepthAdd;
+  private int searchDepthStep;
   private GameBoard board;
 
   // Creates a machine player with the given color.  Color is either 0 (black)
   // or 1 (white).  (White has the first move.)
   public MachinePlayer(int color) {
+    // iterative deepening will be required to return a move within 5 seconds
     if (color == 0) {
       this.color = BLACK_PLAYER;
     } else if (color == 1) {
@@ -30,7 +29,7 @@ public class MachinePlayer extends Player {
       throw new IllegalArgumentException("color: " + color + " is invalid.");
     }
     board = new GameBoard();
-    searchDepth = 1; // update later
+    searchDepth = 10; // update later
   }
 
   // Creates a machine player with the given color and search depth.  Color is
@@ -45,21 +44,14 @@ public class MachinePlayer extends Player {
     }
     board = new GameBoard();
     this.searchDepth = searchDepth;
-
   }
 
   // Returns a new move by "this" player.  Internally records the move (updates
   // the internal game board) as a move by "this" player.
   public Move chooseMove() {
     // make simple move
-    List<MoveWithPlayer> moves = board.getValidMoves(color);
-    ListNode<MoveWithPlayer> node = moves.front();
-    MoveWithPlayer move = null;
-    try {
-      move = node.item();
-    } catch (InvalidNodeException e) {
-      e.printStackTrace();
-    }
+    GameTree gameTree = new GameTree(board, this);
+    MoveWithPlayer move = gameTree.chooseMove(searchDepth);
     board.setChip(move);
     return move;
   }
@@ -70,11 +62,17 @@ public class MachinePlayer extends Player {
   // player.  This method allows your opponents to inform you of their moves.
   public boolean opponentMove(Move m) {
     // TODO: should player color be reversed?
-    MoveWithPlayer move = (MoveWithPlayer) m;
+    MoveWithPlayer move = null;
+    int colorOpponent;
     if (color == BLACK_PLAYER) {
-      move.player = BLACK_PLAYER;
+      colorOpponent = WHITE_PLAYER;
     } else {
-      move.player = WHITE_PLAYER;
+      colorOpponent = BLACK_PLAYER;
+    }
+    if (m.moveKind == Move.ADD) {
+      move = new MoveWithPlayer(m.x1, m.y1, colorOpponent);
+    } else if (m.moveKind == Move.STEP) {
+      move = new MoveWithPlayer(m.x1, m.y1, m.x2, m.y2, colorOpponent);
     }
     return board.setChip(move);
   }

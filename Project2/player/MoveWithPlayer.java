@@ -27,14 +27,29 @@ public class MoveWithPlayer extends Move {
 
   // toString() converts the move to a String.
   public String toString() {
+    String playerString = "";
+    if (player == MachinePlayer.BLACK_PLAYER) {
+      playerString = "BLACK";
+    } else if (player == MachinePlayer.WHITE_PLAYER) {
+      playerString = "WHITE";
+    }
     switch (moveKind) {
       case QUIT:
         return "[quit]";
       case ADD:
-        return "[add to " + x1 + "" + y1 + "]";
+        return "[add to " + x1 + "" + y1 + " " + playerString + "]";
       default:
-        return "[step from " + x2 + "" + y2 + " to " + x1 + "" + y1 + "]";
+        return "[step from " + x2 + "" + y2 + " to " + x1 + "" + y1 + " for " + playerString + "]";
     }
+  }
+
+  public boolean equals(Object obj) {
+    if (obj == null || !(obj instanceof MoveWithPlayer)) {
+      return false;
+    }
+    MoveWithPlayer other = (MoveWithPlayer) obj;
+    return x1 == other.x1 && y1 == other.y1 && player == other.player && moveKind == other.moveKind &&
+        x2 == other.x2 && y2 == other.y2;
   }
 
 }

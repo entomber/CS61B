@@ -3,16 +3,16 @@ package player;
 import DataStructures.List.List;
 import java.util.Arrays;
 import java.util.Iterator;
-
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 public class GameBoardTest {
 
-  private final static int BLACK_PLAYER = 0;
-  private final static int WHITE_PLAYER = 1;
+  private final static int BLACK_PLAYER = MachinePlayer.BLACK_PLAYER;
+  private final static int WHITE_PLAYER = MachinePlayer.WHITE_PLAYER;
   private final static int BOARD_SIZE = 8;
   private final static int UP = GameBoard.DIR_UP;
   private final static int UP_RIGHT = GameBoard.DIR_UP_RIGHT;
