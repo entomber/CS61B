@@ -29,7 +29,7 @@ public class MachinePlayer extends Player {
       throw new IllegalArgumentException("color: " + color + " is invalid.");
     }
     board = new GameBoard();
-    searchDepth = 10; // update later
+    searchDepth = 5; // update later
   }
 
   // Creates a machine player with the given color and search depth.  Color is
@@ -51,7 +51,7 @@ public class MachinePlayer extends Player {
   public Move chooseMove() {
     // make simple move
     GameTree gameTree = new GameTree(board, this);
-    MoveWithPlayer move = gameTree.chooseMove(searchDepth);
+    MoveWithPlayer move = gameTree.iterativeDeepeningSearch(searchDepth);
     board.setChip(move);
     return move;
   }

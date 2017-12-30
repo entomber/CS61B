@@ -7,7 +7,6 @@ import DataStructures.List.ListNode;
 import DataStructures.List.DList;
 import DataStructures.List.InvalidNodeException;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -26,13 +25,18 @@ import java.util.NoSuchElementException;
 public class HashTableChained implements Dictionary, Iterable<Entry> {
 
   /**
+   *  THRESHOLD is the load factor (size/N) threshold.
+   *  DEFAULT_SIZE is the default size of the table when no initial size is supplied to the constructor.
    *  size is the number of entries in the dictionary.
    *  N is the number of buckets in the dictionary.
    *  table stores lists of entries.
    **/
+  private final static double THRESHOLD = 0.75;
+  private final static int DEFAULT_SIZE = 50;
   private int size;
   int N;
   private Object[] table;
+
 
 
   /** 
@@ -43,7 +47,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
 
   public HashTableChained(int sizeEstimate) {
     // set up hash table with initial load factor of ~0.5 and N to first prime > sizeEstimate * 2
-    N = firstPrimeAfter(sizeEstimate * 2);
+    N = getFirstPrimeAfter(sizeEstimate * 2);
     table = new Object[N];
     size = 0;
   }
@@ -54,11 +58,11 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
    **/
 
   public HashTableChained() {
-    this(50);
+    this(DEFAULT_SIZE);
   }
 
   // returns the first prime number after the input number
-  private int firstPrimeAfter(int x) {
+  private int getFirstPrimeAfter(int x) {
     int prime = x;
     boolean primeFound = false;
     while (!primeFound) {
@@ -81,7 +85,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
    *  @return an int in the range [0, N-1] that maps a hash code to a bucket
    **/
 
-  int compFunction(int code) {
+  int compFunction(int code, int N) {
     int a = 3;
     int b = 7;
     int p = 16908799;
@@ -131,14 +135,12 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     if (key == null) {
       return null;
     }
-
-    if ((double) size / N >= 0.75) {
+    if ((double) (size + 1) / N >= THRESHOLD) {
       expandHashTable();
     }
 
-    int index = compFunction(key.hashCode());
+    int index = compFunction(key.hashCode(), N);
     List<Entry> list;
-
     if (table[index] == null) {
       list = new DList<Entry>();
       table[index] = list;
@@ -156,7 +158,25 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
 
   // expands the hash table when load factor >= 0.75
   private void expandHashTable() {
-//    Object[] newTable =
+    int newN = getFirstPrimeAfter((size+1) * 2);
+    Object[] newTable = new Object[newN];
+    for (Entry entry : this) {
+      int index = compFunction(entry.key.hashCode(), newN);
+      List<Entry> list;
+
+      if (newTable[index] == null) {
+        list = new DList<Entry>();
+        newTable[index] = list;
+      } else {
+        list = (List<Entry>) newTable[index];
+      }
+      Entry newEntry = new Entry();
+      newEntry.key = entry.key;
+      newEntry.value = entry.value;
+      list.insertBack(newEntry);
+    }
+    N = newN;
+    table = newTable;
   }
 
   /** 
@@ -175,7 +195,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     if (key == null) {
       return null;
     }
-    int index = compFunction(key.hashCode());
+    int index = compFunction(key.hashCode(), N);
     // No list for key mapped to bucket, return null
     if (table[index] == null) {
       return null;
@@ -208,7 +228,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     if (key == null) {
       return null;
     }
-    int index = compFunction(key.hashCode());
+    int index = compFunction(key.hashCode(), N);
     // No list for key mapped to bucket, return null
     if (table[index] == null) {
       return null;

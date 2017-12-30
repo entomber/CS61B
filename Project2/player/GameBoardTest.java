@@ -14,14 +14,14 @@ public class GameBoardTest {
   private final static int BLACK_PLAYER = MachinePlayer.BLACK_PLAYER;
   private final static int WHITE_PLAYER = MachinePlayer.WHITE_PLAYER;
   private final static int BOARD_SIZE = 8;
-  private final static int UP = GameBoard.DIR_UP;
-  private final static int UP_RIGHT = GameBoard.DIR_UP_RIGHT;
-  private final static int RIGHT = GameBoard.DIR_RIGHT;
-  private final static int DOWN_RIGHT = GameBoard.DIR_DOWN_RIGHT;
-  private final static int DOWN = GameBoard.DIR_DOWN;
-  private final static int DOWN_LEFT = GameBoard.DIR_DOWN_LEFT;
-  private final static int LEFT = GameBoard.DIR_LEFT;
-  private final static int UP_LEFT = GameBoard.DIR_UP_LEFT;
+  private final static int UP = GameBoard.DIRECTION_UP;
+  private final static int UP_RIGHT = GameBoard.DIRECTION_UP_RIGHT;
+  private final static int RIGHT = GameBoard.DIRECTION_RIGHT;
+  private final static int DOWN_RIGHT = GameBoard.DIRECTION_DOWN_RIGHT;
+  private final static int DOWN = GameBoard.DIRECTION_DOWN;
+  private final static int DOWN_LEFT = GameBoard.DIRECTION_DOWN_LEFT;
+  private final static int LEFT = GameBoard.DIRECTION_LEFT;
+  private final static int UP_LEFT = GameBoard.DIRECTION_UP_LEFT;
 
   // test setChip() on a move out of the boundaries of the board.
   @Test
@@ -283,7 +283,7 @@ public class GameBoardTest {
         "Black: { [2, 0] [4, 0] [5, 0] [1, 2] [2, 2] [4, 2] [5, 2] [1, 4] [4, 4] [5, 4] }",
         "Top: { [2, 0] [4, 0] [5, 0] }", "Bottom: { }", "Left: { }", "Right: { }" };
     assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
   }
 
   // test setChip() updates internal goal lists correctly for add moves.
@@ -306,7 +306,7 @@ public class GameBoardTest {
         "Top: { [1, 0] [2, 0] [5, 0] [6, 0] }", "Bottom: { [1, 7] [2, 7] [5, 7] [6, 7] }",
         "Left: { [0, 1] [0, 2] [0, 5] [0, 6] }", "Right: { [7, 1] [7, 2] [7, 5] [7, 6] }"};
     assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
   }
 
   // test setChip() updates internal goal lists correctly for step moves.
@@ -334,7 +334,7 @@ public class GameBoardTest {
         "Top: { [2, 0] [5, 0] [3, 0] }", "Bottom: { [1, 7] [5, 7] [3, 7] }",
         "Left: { [0, 1] [0, 2] [0, 6] }", "Right: { [7, 1] [7, 5] [7, 3] }" };
     assertEquals("Chip list should be correct.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
     // second step moves: 1. move chip from goal area to non-goal area, move chip from one goal area to other,
     // 3. move chip from non-goal area to goal area, 4. move chip from non-goal area to non-goal area
     board.setChip(new MoveWithPlayer(1, 1, 2, 0, BLACK_PLAYER)); // 1
@@ -349,7 +349,7 @@ public class GameBoardTest {
     expectedResults[4] = "Left: { [0, 1] [0, 2] [0, 6] }";
     expectedResults[5] = "Right: { [7, 1] [7, 5] [7, 3] [7, 6] }";
     assertEquals("Chip list should be correct.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
 
     // third step moves: empty a goal list and add a chip back to it
     board.setChip(new MoveWithPlayer(1, 6, 3, 0, BLACK_PLAYER));
@@ -359,7 +359,7 @@ public class GameBoardTest {
     expectedResults[1] = "Black: { [1, 7] [5, 7] [3, 5] [4, 5] [3, 7] [1, 1] [6, 7] [1, 6] [6, 5] [5, 0] }";
     expectedResults[2] = "Top: { [5, 0] }";
     assertEquals("Chip list should be correct.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
   }
 
   // test undoSetChip() before any moves have been made.
@@ -383,7 +383,7 @@ public class GameBoardTest {
     assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
     String[] expectedResults = { "White: { }", "Black: { }", "Top: { }", "Bottom: { }", "Left: { }", "Right: { }" };
     assertEquals("All chip lists should be empty", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
 
     MoveWithPlayer m2 = new MoveWithPlayer(moves[1][0], moves[1][1], WHITE_PLAYER);
     board.setChip(m2);
@@ -395,7 +395,7 @@ public class GameBoardTest {
     expectedResults[0] = "White: { [7, 2] }";
     expectedResults[5] = "Right: { [7, 2] }";
     assertEquals("Only m2 should be in the chip lists.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
 
     assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
   }
@@ -419,23 +419,23 @@ public class GameBoardTest {
         "Top: { [1, 0] [5, 0] [6, 0] [3, 0] }", "Bottom: { [1, 7] [2, 7] [5, 7] [6, 7] }",
         "Left: { }", "Right: { }" };
     assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
-    board.chipListsToString());
+    board.getChipListsAsString());
 
     board.undoSetChip(BLACK_PLAYER);
     expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 3] [2, 0] }";
     expectedResults[2] = "Top: { [1, 0] [5, 0] [6, 0] [2, 0] }";
     assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
 
     board.undoSetChip(BLACK_PLAYER);
     expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [2, 0] [4, 2] }";
     assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
 
     board.undoSetChip(BLACK_PLAYER);
     expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [2, 0] }";
     assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
-        board.chipListsToString());
+        board.getChipListsAsString());
   }
 
   // test getValidMoves() on an empty board.

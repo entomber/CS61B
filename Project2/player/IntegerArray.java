@@ -10,6 +10,7 @@ public class IntegerArray {
 
   /**
    * IntegerArray() constructs a new wrapped Integer array.
+   *
    * @param component the Integer array to wrap.
    */
   public IntegerArray(Integer[] component) {
@@ -26,8 +27,8 @@ public class IntegerArray {
    *    hashCode = 31 * hashCode + item;
    *
    *  @return hash code for this IntegerArray.
-   *
    */
+  @Override
   public int hashCode() {
     int hashCode = 1;
     for (int item : component) {
@@ -36,11 +37,23 @@ public class IntegerArray {
     return hashCode;
   }
 
-  public boolean equals(Object array) {
-    if (array == null || !(array instanceof IntegerArray)) {
+
+  /**
+   * equals() compares the specified object with this IntegerArray for equality.  Return true if the given
+   * object is also a IntegerArray, the two IntegerArray contain the same number of Integers, and every
+   * component of the given IntegerArray is contained in this IntegerArray.
+   * and same player.
+   *
+   * @param obj object to be compared for equality with this IntegerArray.
+   *
+   * @return true if the specified object is equal to this IntegerArray.
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || !(obj instanceof IntegerArray)) {
       return false;
     }
-    IntegerArray other = (IntegerArray) array;
+    IntegerArray other = (IntegerArray) obj;
     if (other.component.length != component.length) {
       return false;
     }
@@ -52,6 +65,12 @@ public class IntegerArray {
     return true;
   }
 
+  /**
+   * toString() returns a String representation of this IntegerArray.
+   *
+   * @return a String representation of this IntegerArray.
+   */
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(20);
     sb.append("[");

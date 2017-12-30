@@ -25,7 +25,12 @@ public class MoveWithPlayer extends Move {
     this.player = player;
   }
 
-  // toString() converts the move to a String.
+  /**
+   * toString() returns a String representation of this MoveWithPlayer.
+   *
+   * @return a String representation of this MoveWithPlayer.
+   */
+  @Override
   public String toString() {
     String playerString = "";
     if (player == MachinePlayer.BLACK_PLAYER) {
@@ -43,6 +48,16 @@ public class MoveWithPlayer extends Move {
     }
   }
 
+  /**
+   * equals() compares the specified object with this MoveWithPlayer for equality.  Return true if the given
+   * object is also a MoveWithPlayer, the two MoveWithPlayers have the same coordinates, same move type,
+   * and same player.
+   *
+   * @param obj object to be compared for equality with this MoveWithPlayer.
+   *
+   * @return true if the specified object is equal to this MoveWithPlayer.
+   */
+  @Override
   public boolean equals(Object obj) {
     if (obj == null || !(obj instanceof MoveWithPlayer)) {
       return false;

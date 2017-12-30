@@ -99,7 +99,7 @@ public class DepthFirstPaths {
     }
   }
 
-  // performs DFS: first successful implementation, but using the dfs() instead because it's simpler
+  // performs DFS: first successful implementation, but using dfs() instead because it's simpler
   private void dfsOther(int v, int prevDirection) {
     Iterable<Integer[]> adjacent = G.adj(v);
 
