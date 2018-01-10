@@ -137,6 +137,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     }
     if ((double) (size + 1) / N >= THRESHOLD) {
       expandHashTable();
+      System.out.println("***EXPANDED*** " + size);
     }
 
     int index = compFunction(key.hashCode(), N);
@@ -148,9 +149,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
       list = (List<Entry>) table[index];
     }
 
-    Entry entry = new Entry();
-    entry.key = key;
-    entry.value = value;
+    Entry entry = new Entry(key, value);
     list.insertBack(entry);
     size++;
     return entry;
@@ -158,7 +157,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
 
   // expands the hash table when load factor >= 0.75
   private void expandHashTable() {
-    int newN = getFirstPrimeAfter((size+1) * 2);
+    int newN = getFirstPrimeAfter(N * 2);
     Object[] newTable = new Object[newN];
     for (Entry entry : this) {
       int index = compFunction(entry.key.hashCode(), newN);
@@ -170,9 +169,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
       } else {
         list = (List<Entry>) newTable[index];
       }
-      Entry newEntry = new Entry();
-      newEntry.key = entry.key;
-      newEntry.value = entry.value;
+      Entry newEntry = new Entry(entry.key, entry.value);
       list.insertBack(newEntry);
     }
     N = newN;
@@ -252,21 +249,12 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
   }
 
   /**
-   *  makeEmpty() removes all entries from the dictionary.
+   *  makeEmpty() removes all entries from the dictionary while keeping its size.  Use it when you
+   *  want to re-use the hash table for the same purpose.
    */
   public void makeEmpty() {
     for (int i = 0; i < table.length; i++) {
-      Object list = table[i];
-      if (list != null) {
-        Iterator<Entry> iter = ((List<Entry>) list).iterator();
-        // remove all ListNodes from List
-        while (iter.hasNext()) {
-          iter.next();
-          iter.remove();
-        }
-        // remove reference to List
-        table[i] = null;
-      }
+      table[i] = null;
     }
     size = 0;
   }

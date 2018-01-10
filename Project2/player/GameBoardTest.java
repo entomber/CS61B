@@ -5,9 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class GameBoardTest {
 
@@ -366,8 +364,8 @@ public class GameBoardTest {
   @Test
   public void undoSetChip_noMoves() {
     GameBoard board = new GameBoard();
-    assertFalse("Should not undo move when none has been made.", board.undoSetChip(BLACK_PLAYER));
-    assertFalse("Should not undo move when none has been made.", board.undoSetChip(WHITE_PLAYER));
+    assertFalse("Should not undo move when none has been made.", board.undoSetChip());
+    assertFalse("Should not undo move when none has been made.", board.undoSetChip());
   }
 
   // test undoSetChip() after some add moves made.
@@ -380,29 +378,25 @@ public class GameBoardTest {
 
     MoveWithPlayer m1 = new MoveWithPlayer(moves[0][0], moves[0][1], WHITE_PLAYER);
     board.setChip(m1);
-    assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
+    assertTrue("Should undo move.", board.undoSetChip());
     String[] expectedResults = { "White: { }", "Black: { }", "Top: { }", "Bottom: { }", "Left: { }", "Right: { }" };
     assertEquals("All chip lists should be empty", String.join("\n", expectedResults),
         board.getChipListsAsString());
 
     MoveWithPlayer m2 = new MoveWithPlayer(moves[1][0], moves[1][1], WHITE_PLAYER);
     board.setChip(m2);
-    assertFalse("Should not undo move when none has been made.", board.undoSetChip(BLACK_PLAYER));
-
     MoveWithPlayer m3 = new MoveWithPlayer(moves[2][0], moves[2][1], WHITE_PLAYER);
     board.setChip(m3);
-    assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
+    assertTrue("Should undo move.", board.undoSetChip());
     expectedResults[0] = "White: { [7, 2] }";
     expectedResults[5] = "Right: { [7, 2] }";
     assertEquals("Only m2 should be in the chip lists.", String.join("\n", expectedResults),
         board.getChipListsAsString());
-
-    assertTrue("Should undo move.", board.undoSetChip(WHITE_PLAYER));
   }
 
   // test undoStepChip() after some step moves made and at boundary between step and add moves.
   @Test
-  public void undoSetChip_undoStepMoves() {
+  public void undoSetChip_undoStepMove() {
     GameBoard board = new GameBoard();
     // 10 black chips
     int[][] addMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
@@ -419,23 +413,24 @@ public class GameBoardTest {
         "Top: { [1, 0] [5, 0] [6, 0] [3, 0] }", "Bottom: { [1, 7] [2, 7] [5, 7] [6, 7] }",
         "Left: { }", "Right: { }" };
     assertEquals("Chip lists should be correct.", String.join("\n", expectedResults),
-    board.getChipListsAsString());
+        board.getChipListsAsString());
 
-    board.undoSetChip(BLACK_PLAYER);
+    board.undoSetChip();
     expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 3] [2, 0] }";
     expectedResults[2] = "Top: { [1, 0] [5, 0] [6, 0] [2, 0] }";
     assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
         board.getChipListsAsString());
 
-    board.undoSetChip(BLACK_PLAYER);
+    board.undoSetChip();
     expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [2, 0] [4, 2] }";
     assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
         board.getChipListsAsString());
 
-    board.undoSetChip(BLACK_PLAYER);
+    board.undoSetChip();
     expectedResults[1] = "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [2, 0] }";
     assertEquals("Chip lists should be correct after undo.", String.join("\n", expectedResults),
         board.getChipListsAsString());
+
   }
 
   // test getValidMoves() on an empty board.
@@ -796,4 +791,32 @@ public class GameBoardTest {
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     assertFalse("Board should not have a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
+
+  // test getZobristKey() on different board states.
+  @Test
+  public void getZobristKey_normalOperation() {
+    GameBoard board1 = new GameBoard();
+    GameBoard board2 = new GameBoard();
+
+    long zobristKey1 = board1.getZobristKey();
+    long zobristKey2 = board1.getZobristKey();
+    assertEquals("Zobrist key matches for subsequent call to getZobristKey().", zobristKey1, zobristKey2);
+
+    board1.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
+    long zobristKey3 = board1.getZobristKey();
+    assertNotEquals("Zobrist key different when board state changes.", zobristKey1, zobristKey3);
+
+    board2.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
+    long zobristKey4 = board1.getZobristKey();
+    assertEquals("Zobrist key matches for different GameBoards with same state.", zobristKey3, zobristKey4);
+
+    board2.undoSetChip();
+    long zobristKey5 = board2.getZobristKey();
+    assertNotEquals("Zobrist key matches after undoing move.", zobristKey1, zobristKey5);
+
+    board2.setChip(new MoveWithPlayer(3, 3, BLACK_PLAYER));
+    long zobristKey6 = board2.getZobristKey();
+    assertNotEquals("Zobrist key different for different color move in same square.", zobristKey4, zobristKey6);
+  }
+
 }

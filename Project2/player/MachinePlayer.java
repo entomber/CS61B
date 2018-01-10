@@ -11,8 +11,7 @@ public class MachinePlayer extends Player {
   public final static int BLACK_PLAYER = 0;
   public final static int WHITE_PLAYER = 1;
 
-  private int color;
-  private int searchDepth;
+  private final int color;
   private int searchDepthAdd;
   private int searchDepthStep;
   private GameBoard board;
@@ -20,7 +19,6 @@ public class MachinePlayer extends Player {
   // Creates a machine player with the given color.  Color is either 0 (black)
   // or 1 (white).  (White has the first move.)
   public MachinePlayer(int color) {
-    // iterative deepening will be required to return a move within 5 seconds
     if (color == 0) {
       this.color = BLACK_PLAYER;
     } else if (color == 1) {
@@ -29,29 +27,24 @@ public class MachinePlayer extends Player {
       throw new IllegalArgumentException("color: " + color + " is invalid.");
     }
     board = new GameBoard();
-    searchDepth = 5; // update later
+    searchDepthAdd = 5;
+    searchDepthStep = 2;
   }
 
   // Creates a machine player with the given color and search depth.  Color is
   // either 0 (black) or 1 (white).  (White has the first move.)
   public MachinePlayer(int color, int searchDepth) {
-    if (color == 0) {
-      this.color = BLACK_PLAYER;
-    } else if (color == 1) {
-      this.color = WHITE_PLAYER;
-    } else {
-      throw new IllegalArgumentException("color: " + color + " is invalid.");
-    }
-    board = new GameBoard();
-    this.searchDepth = searchDepth;
+    this(color);
+    searchDepthAdd = searchDepth;
+    searchDepthStep = searchDepth;
   }
 
   // Returns a new move by "this" player.  Internally records the move (updates
   // the internal game board) as a move by "this" player.
   public Move chooseMove() {
     // make simple move
-    GameTree gameTree = new GameTree(board, this);
-    MoveWithPlayer move = gameTree.iterativeDeepeningSearch(searchDepth);
+    GameTree gameTree = new GameTree(board, color, searchDepthAdd, searchDepthStep);
+    MoveWithPlayer move = gameTree.iterativeDeepeningSearch();
     board.setChip(move);
     return move;
   }

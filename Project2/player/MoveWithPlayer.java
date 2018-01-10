@@ -6,7 +6,6 @@ package player;
  *  A public class for holding all the fields in a move.  This class is a
  *  container for data, not an ADT; hence, all fields are public.  It has
  *  been extended to save which player made a move.
- *
  */
 
 public class MoveWithPlayer extends Move {

@@ -28,7 +28,6 @@ public class HashTableChainedTest {
     table.makeEmpty();
   }
 
-  // change access of N before test
   @Test
   public void HashTableChained_parameter() throws IllegalAccessException {
     int[][] sizes = { {2,5}, {3,7}, {4,11}, {5,11}, {6,13}, {7,17}, {8,17}, {9,19} };
@@ -42,14 +41,12 @@ public class HashTableChainedTest {
     }
   }
 
-  // change access of N before test
   @Test
   public void HashTableChained_noParameter() throws IllegalAccessException {
       assertTrue("Constructor with sizeEstimate entries should generate prime number " +
           "of buckets and at least 100.", (int) field.get(table) == 101);
   }
 
-  // change access of N before test
   @Test
   public void compFunction() throws IllegalAccessException {
     int[] hashcodes = { Integer.MIN_VALUE, Integer.MIN_VALUE+1, Integer.MIN_VALUE/2,
@@ -190,13 +187,12 @@ public class HashTableChainedTest {
     }
   }
 
-  // change access of N before test
   @Test
   public void insert_expandTable() throws IllegalAccessException {
     table = new HashTableChained(2);
 
     int[][] items = { {1,1}, {2,2}, {3,3}, {4,4}, {5,5}, {6,6}, {7,7}, {8,8}, {9,9} };
-    int[] Nvalue =  { 5, 11, 19 };
+    int[] Nvalue =  { 5, 11, 23 };
     int nIndex = 0;
     for (int i = 0; i < items.length; i++) {
       int key = items[i][0];

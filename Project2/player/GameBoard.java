@@ -7,11 +7,13 @@ import DataStructures.List.List;
 import DataStructures.List.DList;
 import DataStructures.Stack.Stack;
 import DataStructures.dict.HashTableChained;
+
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- * GameBoard is a representation of a board in a Network game.  Keeps track of the chips on the board,
+ * GameBoard is a representation of a board in a Network game.  It keeps track of the chips on the board,
  * and has methods for setting chips, undoing last set chip, validating moves, getting all connections
  * for a given chip position, and detecting a network (win condition).
  */
@@ -38,7 +40,11 @@ public class GameBoard {
    * rightGoalChips is a List of white chips in the right white goal area.
    * topGoalChips is a List of black chips in the top black goal area.
    * bottomGoalChips is a List of black chips in the bottom black goal area.
-   *
+   * whiteMoves is a Stack of the moves made by the white player.
+   * blackMoves is a Stack of the moves made by the black player.
+   * moveOrder is a Stack of the player turns. At the top of the stack is the last player who made a move.
+   * zobristArray is filled with randomly generated numbers for each unique move on the board.
+   * zobristKey is the board's zobrist key.
    */
   private final static int BLACK_PLAYER = MachinePlayer.BLACK_PLAYER;
   private final static int WHITE_PLAYER = MachinePlayer.WHITE_PLAYER;
@@ -69,9 +75,12 @@ public class GameBoard {
   private List<Integer[]> bottomGoalChips;
   private Stack<MoveWithPlayer> whiteMoves;
   private Stack<MoveWithPlayer> blackMoves;
+  private Stack<Integer> moveOrder;
+  private long[][] zobristArray;
+  private long zobristKey;
 
   /**
-   *  Creates a new game board
+   *  Creates a new game board.
    */
   public GameBoard() {
     grid = new int[BOARD_SIZE][BOARD_SIZE];
@@ -85,6 +94,43 @@ public class GameBoard {
     bottomGoalChips = new DList<Integer[]>();
     whiteMoves = new Stack<MoveWithPlayer>();
     blackMoves = new Stack<MoveWithPlayer>();
+    moveOrder = new Stack<Integer>();
+    zobristArray = new long[BOARD_SIZE * BOARD_SIZE][2];
+    fillZobristArray();
+    zobristKey = 0;
+  }
+
+  // fill zobrist array with randomly generated numbers
+  private void fillZobristArray() {
+    for (int square = 0; square < BOARD_SIZE*BOARD_SIZE; square++) {
+      for (int color = 0; color < 2; color++) {
+        zobristArray[square][color] = getRandomLong();
+      }
+    }
+  }
+
+  // generate a random long to initialize the zobrist array
+  private static long getRandomLong() {
+    SecureRandom random = new SecureRandom();
+    return random.nextLong();
+  }
+
+  /**
+   * getZobristKey() returns a zobrist key for use in transposition (hash) tables.
+   *
+   * @return a long zobrist key
+   */
+  public long getZobristKey() {
+    return zobristKey;
+  }
+
+  // updates the zobrist key based upon setting x, y to chipColor
+  private void updateZobristKey(int x, int y, int chipColor) {
+    if (chipColor == WHITE_CHIP) {
+      zobristKey ^= zobristArray[(y * BOARD_SIZE) + x][0];
+    } else {
+      zobristKey ^= zobristArray[(y * BOARD_SIZE) + x][1];
+    }
   }
 
   /**
@@ -100,6 +146,7 @@ public class GameBoard {
     if (!isValidMove(move)) {
       return false;
     }
+    moveOrder.push(move.player);
     int chipColor;
     int chipCount;
     List<Integer[]> chipPositions;
@@ -127,10 +174,13 @@ public class GameBoard {
       removeChipIfInGoal(move.x2, move.y2);
       grid[move.x2][move.y2] = NO_CHIP;
       grid[move.x1][move.y1] = chipColor;
+      updateZobristKey(move.x2, move.y2, NO_CHIP);
+      updateZobristKey(move.x1, move.y1, chipColor);
     }
     // add move
     else {
       grid[move.x1][move.y1] = chipColor;
+      updateZobristKey(move.x1, move.y1, chipColor);
       if (move.player == WHITE_PLAYER) {
         whiteChipCount++;
       } else {
@@ -160,22 +210,27 @@ public class GameBoard {
   }
 
   /**
-   *  undoSetChip() undoes the last setChip() for the given player.  It returns false if there was no chip
-   *  successfully set for the player prior.
+   *  undoSetChip() undoes the last successful setChip().  It returns false if no player set
+   *  a chip previously, or undoSetChip() was called twice in a row without a call to setChip().
    *
-   *  Unusual conditions:
-   *   - if player is neither WHITE_PLAYER or BLACK_PLAYER, throws IllegalArgumentException.
-   *
-   *  @param player is WHITE_PLAYER or BLACK_PLAYER.
    *  @return true if move was valid and completed, false otherwise.
    *
    *  Performance: runs in O(1) time.
    */
-  protected boolean undoSetChip(int player) {
+  protected boolean undoSetChip() {
     int chipColor;
     Stack<MoveWithPlayer> moves;
     List<Integer[]> chipPositions;
-    if (player == WHITE_PLAYER) {
+    int lastPlayer;
+
+    // get last player that made a move, and return false
+    if (moveOrder.peek() != null) {
+      lastPlayer = moveOrder.pop();
+    } else {
+      return false;
+    }
+
+    if (lastPlayer == WHITE_PLAYER) {
       chipColor = WHITE_CHIP;
       moves = whiteMoves;
       chipPositions = whiteChips;
@@ -183,10 +238,6 @@ public class GameBoard {
       chipColor = BLACK_CHIP;
       moves = blackMoves;
       chipPositions = blackChips;
-    }
-    // no moves made yet
-    if (moves.length() == 0) {
-      return false;
     }
     // save reference to last move and remove it from moves list and remove chip from chipPositions
     MoveWithPlayer lastMove = moves.pop();
@@ -205,6 +256,8 @@ public class GameBoard {
       chipPositions.insertBack(square);
       grid[lastMove.x1][lastMove.y1] = NO_CHIP;
       grid[lastMove.x2][lastMove.y2] = chipColor;
+      updateZobristKey(lastMove.x1, lastMove.y1, NO_CHIP);
+      updateZobristKey(lastMove.x2, lastMove.y2, chipColor);
       // add to goal chip list
       if (isInLeftGoal(lastMove.x2, lastMove.y2)) {
         leftGoalChips.insertBack(square);
@@ -224,6 +277,7 @@ public class GameBoard {
         blackChipCount--;
       }
       grid[lastMove.x1][lastMove.y1] = NO_CHIP;
+      updateZobristKey(lastMove.x1, lastMove.y1, NO_CHIP);
     }
     // remove if in goal list
     removeChipIfInGoal(lastMove.x1, lastMove.y1);
@@ -748,50 +802,6 @@ public class GameBoard {
     }
     sb.append("\n");
     return sb.toString();
-  }
-
-  /**
-   *  equals() returns true if "this" GameBoard "board" have identical values in every cell.
-   *
-   *  @param board is the second GameBoard.
-   *  @return true if the boards are equal, false otherwise.
-   */
-  @Override
-  public boolean equals(Object board) {
-    if (board == null) {
-      return false;
-    }
-    if (!(board instanceof GameBoard)) {
-      return false;
-    }
-    GameBoard other = (GameBoard) board;
-    for (int y = 0; y < BOARD_SIZE; y++) {
-      for (int x = 0; x < BOARD_SIZE; x++) {
-        if (grid[x][y] != other.grid[x][y]) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   *  hashCode() returns a hash code for this GameBoard.
-   *
-   *  See "dmeister" @ https://stackoverflow.com/questions/113511/best-implementation-for-hashcode-method
-   *  for details.
-   *
-   *  @return a hash code for this GameBoard.
-   */
-  @Override
-  public int hashCode() {
-    int result = 13;
-    for (int y = 0; y < grid.length; y++) {
-      for (int x = 0; x < grid.length; x++) {
-        result = 37 * result + grid[x][y];
-      }
-    }
-    return result;
   }
 
   // returns true if given x, y is a corner; false, otherwise.

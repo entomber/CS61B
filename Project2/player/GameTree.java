@@ -1,18 +1,24 @@
 package player;
 
 import DataStructures.List.List;
-import DataStructures.List.InvalidNodeException;
+import DataStructures.dict.Entry;
 import DataStructures.dict.HashTableChained;
 
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * GameTree is a
  *
- * chooseMove() finds the best move for a player.  It uses a minimax algorithm with alpha-beta pruning and evaluation
+ * alphaBeta() finds the best move for a player.  It uses a minimax algorithm with alpha-beta pruning and evaluation
  * function to aggressively prune branches.  The move and score for a board configuration are stored in a
  * transposition table for quick lookup so same board configurations do not need to be evaluated twice. It is only
  * useful if searching at least 3 levels deep where repeat moves board configurations for a player may occur.
+ *
+ * Credit to Jeroen W.T. Carolus' 'Alpha-Beta with Sibling Prediction Pruning in Chess'
+ * (https://homepages.cwi.nl/~paulk/theses/Carolus.pdf (pg. 14) for explanation and pseudo code for transpostion tables.
+ *
+ *
  */
 public class GameTree {
   /**
@@ -21,65 +27,92 @@ public class GameTree {
    * ALPHA is the initial alpha value passed in to alpha-beta search.
    * BETA is the initial beta value passed in to alpha-beta search.
    * MAX_SCORE is the maximum possible score.
-   * COMPUTER is the current player, either BLACK_PLAYER or WHITE_PLAYER.
-   * OPPONENT is the opponent player, either BLACK_PLAYER or WHITE_PLAYER.
+   * ESTIMATED_TABLE_ENTRIES is the estimated number of entries in the transposition table.
+   * computerPlayer is the current player, either BLACK_PLAYER or WHITE_PLAYER.
+   * opponentPlayer is the opponent player, either BLACK_PLAYER or WHITE_PLAYER.
+   * depthLimitAddMove is the maximum search depth for add moves.
+   * depthLimitStepMove is the maximum search depth for step moves.
    * board is the current game board state.
-   * table is a transposition table, keys: board configuration, values: Best (move and score).
-   * score contains the score when the game is over (there's a network or search depth reached).
+   * table is a transposition table, keys: zobrist hash of board, values: Best (move, score and cutoff values).
+   * winner holds the winner if there is one.
+   * isWin is true if there's a winner, false otherwise.
    */
   private final static int BLACK_PLAYER = MachinePlayer.BLACK_PLAYER;
   private final static int WHITE_PLAYER = MachinePlayer.WHITE_PLAYER;
   private final static int ALPHA = Integer.MIN_VALUE;
   private final static int BETA = Integer.MAX_VALUE;
   private final static double MAX_SCORE = 1000.0;
+  private final static int ESTIMATED_TABLE_ENTRIES = 140000; // for depth 5
 
-  private final int COMPUTER;
-  private final int OPPONENT;
+  private final int computerPlayer;
+  private final int opponentPlayer;
+  private final int searchDepthAdd;
+  private final int searchDepthStep;
   private GameBoard board;
   private HashTableChained table;
-  private double score;
+  private int winner;
+  private boolean isWin;
 
-  public GameTree(GameBoard board, MachinePlayer player) {
-    COMPUTER = player.getColor();
-    if (COMPUTER == BLACK_PLAYER) {
-      OPPONENT = WHITE_PLAYER;
+  private int lookup;
+  private int store;
+  private int nodeCount;
+
+  public GameTree(GameBoard board, int playerColor, int searchDepthAdd, int searchDepthStep) {
+    computerPlayer = playerColor;
+    if (computerPlayer == BLACK_PLAYER) {
+      opponentPlayer = WHITE_PLAYER;
     } else {
-      OPPONENT = BLACK_PLAYER;
+      opponentPlayer = BLACK_PLAYER;
     }
     this.board = board;
-    table = new HashTableChained(500000);
-  }
-
-  protected MoveWithPlayer fixedDepthSearch(int depth) {
-    Best best = chooseMove(COMPUTER, 0, depth, ALPHA, BETA);
-    table.makeEmpty(); // clean up transposition table
-    return best.move;
+    this.searchDepthAdd = searchDepthAdd;
+    this.searchDepthStep = searchDepthStep;
+    // create a table of bucket size ~4/3 * ESTIMATED_TABLE_ENTRIES
+    table = new HashTableChained((int) (ESTIMATED_TABLE_ENTRIES/2 * 4/3.0));
   }
 
   /**
-   * chooseMove() searches the game tree for the best move utilizing minimax with iterative deepening given a maximum depth and time constraint.
-   *
-   * @param maxDepth the maximum depth to perform iterative deepening depth-first search.
-   * @return
+   * iterativeDeepeningSearch() searches the game tree for the best move utilizing:
+   *  - minimax search with alpha-beta pruning,
+   *  - iterative deepening,
+   *  - transposition table,
+   *  - move reordering based on static evaluation of single depth move to enhance cutoff in alpha-beta pruning
+
+   * @return the best MoveWithPlayer encountered up to the search depth
    */
-  protected MoveWithPlayer iterativeDeepeningSearch(int maxDepth) {
+  protected MoveWithPlayer iterativeDeepeningSearch() {
     double bestScore = -1.0;
     Best best = null;
-    // Execute minimax at each depth, if score at next depth is greater than score at current depth, continue
-    // deeper.  If score is not greater at current depth, return prior depth's best move.
-    for (int searchDepth = 1; searchDepth <= maxDepth; searchDepth++) {
-      Best bestAtCurrentDepth = chooseMove(COMPUTER, 0, searchDepth, ALPHA, BETA);
+
+    lookup = 0;
+    store = 0;
+    nodeCount = 0;
+
+    int blackChipCount = board.getBlackChips().length();
+    int searchDepth = searchDepthAdd;
+    if (blackChipCount == 10) {
+      searchDepth = searchDepthStep;
+    }
+//    long start = System.currentTimeMillis();
+    for (int depth = 1; depth <= searchDepth; depth++) {
+      Best bestAtCurrentDepth = alphaBeta(computerPlayer, depth, ALPHA, BETA);
       if (bestAtCurrentDepth.score > bestScore) {
         best = bestAtCurrentDepth;
         bestScore = bestAtCurrentDepth.score;
+        System.out.println("IDDFS - best at depth: " + depth + ", move: " + bestAtCurrentDepth.move +
+            ", score: " + bestAtCurrentDepth.score + ", bestScore: " + bestScore);
+        System.out.println("lookup: " + lookup + ", store: " + store + ", table size: " + table.size());
       }
-      // TODO: break if score at multiple depths down isn't better?
-/*      else {
+
+      // stop searching if we find ANY winning move at depth 0
+      if (bestScore == MAX_SCORE) {
         break;
-      }*/
+      }
     }
     table.makeEmpty(); // clean up transposition table
-    // return either the prior depth's best move (if next depth didn't evaluate higher) or maxDepth best move
+
+//    long end = System.currentTimeMillis();
+//    System.out.println(nodeCount * 1000 / (end-start) + " nodes/s");
 
     // temp for testing
     if (best == null) {
@@ -90,47 +123,68 @@ public class GameTree {
   }
 
   // minimax with alpha-beta pruning and transposition table
-  private Best chooseMove(int side, int currentDepth, int searchDepth, double alpha, double beta) {
+  private Best alphaBeta(int side, int depth, double alpha, double beta) {
+    nodeCount++;
     Best myBest = new Best(); // my best move
     Best reply; // opponent's best reply
-    // if board is in transposition table, return the stored Best
-    if (currentDepth >= 2 && table.find(board) != null) {
-      return (Best) table.find(board).value();
+
+    Best entryTT = getTTEntry(); // entry from the transposition table
+    if (entryTT != null && entryTT.depth >= depth) {
+      lookup++;
+      if (entryTT.valueType == Best.EXACT_VALUE) {
+        return entryTT;
+      }
+      if (entryTT.valueType == Best.LOWER_BOUND && entryTT.score > alpha) {
+        alpha = entryTT.score;
+      } else if (entryTT.valueType == Best.UPPER_BOUND && entryTT.score < beta) {
+        beta = entryTT.score;
+      }
+      if (alpha >= beta) {
+        return entryTT;
+      }
     }
-    // check if either player won or search depth reached
-    if (isGameOver(currentDepth, searchDepth)) {
-      myBest.score = score;
+    // if depth reached or player has a Network, store in transposition table
+    if (isGameOver() || depth == 0) {
+      myBest.score = evaluateBoard(depth);
+      if (myBest.score <= alpha) {
+        store++;
+        storeTTEntry(myBest.move, myBest.score, Best.LOWER_BOUND, depth);
+      } else if (myBest.score >= beta) {
+        store++;
+        storeTTEntry(myBest.move, myBest.score, Best.UPPER_BOUND, depth);
+      } else {
+        store++;
+        storeTTEntry(myBest.move, myBest.score, Best.EXACT_VALUE, depth);
+      }
       return myBest;
     }
+
     // set score to most "pessimistic"
-    if (side == COMPUTER) {
+    if (side == computerPlayer) {
       myBest.score = alpha;
     } else {
       myBest.score = beta;
     }
-    List<MoveWithPlayer> moves = board.getValidMoves(side);
-    myBest.move = getFirstMove(moves); // choose any legal move
+    EvaluatedMove[] evaluatedMoves = getOrderedMoves(side); // order moves based based on evaluation
+    myBest.move = getFirstMove(evaluatedMoves); // choose any legal move
     int opponentSide = getOpponent(side); // set opponent side
-    for (MoveWithPlayer move : moves) {
+    for (EvaluatedMove evaluatedMove : evaluatedMoves) {
+      MoveWithPlayer move = evaluatedMove.move;
 
       // randomize first move
-      if (board.getBlackChips().length() == 0 && COMPUTER == BLACK_PLAYER ||
-          board.getWhiteChips().length() == 0 && COMPUTER == WHITE_PLAYER) {
-        move = getRandomMove(moves);
+      if (board.getBlackChips().length() == 0 && computerPlayer == BLACK_PLAYER ||
+          board.getWhiteChips().length() == 0 && computerPlayer == WHITE_PLAYER) {
+        move = getRandomMove(evaluatedMoves);
       }
 
       board.setChip(move); // perform move
-      reply = chooseMove(opponentSide, currentDepth + 1, searchDepth, alpha, beta);
-      // store in hash table
-      if (currentDepth >= 2 && table.find(board) == null) {
-        table.insert(board, new Best(move, reply.score));
-      }
-      board.undoSetChip(side); // undo move
-      if (side == COMPUTER && reply.score > myBest.score) {
+      reply = alphaBeta(opponentSide, depth-1, alpha, beta);
+      board.undoSetChip(); // undo move
+      if (side == computerPlayer && reply.score > myBest.score) {
         myBest.move = move;
         myBest.score = reply.score;
         alpha = reply.score;
-      } else if (side == OPPONENT && reply.score < myBest.score) {
+      } else if (side == opponentPlayer && reply.score < myBest.score) {
         myBest.move = move;
         myBest.score = reply.score;
         beta = reply.score;
@@ -139,17 +193,72 @@ public class GameTree {
         return myBest;
       }
     }
+    if (myBest.score <= alpha) {
+      store++;
+      storeTTEntry(myBest.move, myBest.score, Best.LOWER_BOUND, depth);
+    } else if (myBest.score >= beta) {
+      store++;
+      storeTTEntry(myBest.move, myBest.score, Best.UPPER_BOUND, depth);
+    } else {
+      store++;
+      storeTTEntry(myBest.move, myBest.score, Best.EXACT_VALUE, depth);
+    }
     return myBest;
   }
 
+  private EvaluatedMove[] getOrderedMoves(int side) {
+    List<MoveWithPlayer> moves = board.getValidMoves(side);
+    EvaluatedMove[] evaluatedMoves = new EvaluatedMove[moves.length()];
+    // evaluate each move and store in EvaluatedMove array
+    int i = 0;
+    for (MoveWithPlayer move: moves) {
+      board.setChip(move);
+      double evaluation = evaluateMoveOrdering(move.player);
+      board.undoSetChip();
+      evaluatedMoves[i++] = new EvaluatedMove(move, evaluation);
+    }
+    // sort the moves based upon player (computer: descending, opponent: ascending)
+    if (side == computerPlayer) {
+      Arrays.sort(evaluatedMoves);
+    } else {
+      Arrays.sort(evaluatedMoves, Collections.reverseOrder());
+    }
+    return evaluatedMoves;
+  }
+
+  // returns the first move in move list
+  private MoveWithPlayer getFirstMove(EvaluatedMove[] moves) {
+    if (moves.length != 0) {
+      return moves[0].move;
+    }
+    return null;
+  }
+
+  // returns entry from transposition table if found, otherwise return null
+  private Best getTTEntry() {
+    Entry entry = table.find(board.getZobristKey());
+    if (entry == null) {
+      return null;
+    }
+    return (Best) entry.value();
+  }
+
+  // stores an entry in the transposition table
+  private void storeTTEntry(MoveWithPlayer move, double score, int bound, int depth) {
+    long zobristKey = board.getZobristKey();
+    if (table.find(zobristKey) == null) {
+      table.insert(zobristKey, new Best(move, score, bound, depth));
+    }
+  }
+
   // returns a randomized move out of all possible moves (used for initial move by computer)
-  private MoveWithPlayer getRandomMove(List<MoveWithPlayer> moves) {
+  private MoveWithPlayer getRandomMove(EvaluatedMove[] moves) {
     MoveWithPlayer move = null;
-    int targetPosition = (int) (Math.random() * moves.length());
+    int targetPosition = (int) (Math.random() * moves.length);
     int currentPosition = 0;
-    for (MoveWithPlayer m : moves) {
+    for (EvaluatedMove m : moves) {
       if (currentPosition == targetPosition) {
-        move = m;
+        move = m.move;
         break;
       }
       currentPosition++;
@@ -157,52 +266,62 @@ public class GameTree {
     return move;
   }
 
-  // returns true if there is a winner and false otherwise
-  private boolean isGameOver(int currentDepth, int searchDepth) {
-    // valid network detected for a player, update score
-    if (board.hasValidNetwork(COMPUTER)) {
-      score = MAX_SCORE - currentDepth;
+  // returns true if there is a valid network for a player and false otherwise
+  private boolean isGameOver() {
+    // valid network detected for a player
+    if (board.hasValidNetwork(computerPlayer)) {
+      winner = computerPlayer;
+      isWin = true;
       return true;
-    } else if (board.hasValidNetwork(OPPONENT)) {
-      score = -MAX_SCORE + currentDepth;
-      return true;
-    }
-    // search depth reached, update evaluation function score
-    if (currentDepth >= searchDepth) {
-      score = evaluateBoard();
+    } else if (board.hasValidNetwork(opponentPlayer)) {
+      winner = opponentPlayer;
+      isWin = true;
       return true;
     }
+    winner = Integer.MIN_VALUE;
+    isWin = false;
     return false;
-  }
-
-  // returns the first move in move list
-  private MoveWithPlayer getFirstMove(List<MoveWithPlayer> moves) {
-    MoveWithPlayer move = null;
-    try {
-      move = moves.front().item();
-    } catch (InvalidNodeException e) {
-      e.printStackTrace();
-    }
-    return move;
   }
 
   // returns the opponent side
   private int getOpponent(int side) {
-    if (side == COMPUTER) {
-      return OPPONENT;
+    if (side == computerPlayer) {
+      return opponentPlayer;
     } else {
-      return COMPUTER;
+      return computerPlayer;
     }
   }
 
-  private double evaluateBoard() {
-    return evaluate_basic();
+  // for move ordering evaluation
+  private double evaluateMoveOrdering(int depth) {
+    // valid network detected for a player
+    if (board.hasValidNetwork(computerPlayer)) {
+      return MAX_SCORE - depth;
+    } else if (board.hasValidNetwork(opponentPlayer)) {
+      return -MAX_SCORE + depth;
+    }
+    int sign;
+    if (computerPlayer == BLACK_PLAYER) {
+      sign = 1;
+    } else {
+      sign = -1;
+    }
+    double mobilityWeight = 0.1;
+    double goalWeight = 0.25;
+    return sign * (evaluateMobility(mobilityWeight) + evaluateGoals(goalWeight));
   }
 
   // board evaluation function to score indeterminate boards
-  private double evaluate_basic() {
+  private double evaluateBoard(int depth) {
+    if (isWin) {
+      if (winner == computerPlayer) {
+        return MAX_SCORE - depth;
+      } else if (winner == opponentPlayer) {
+        return -MAX_SCORE + depth;
+      }
+    }
     int sign;
-    if (COMPUTER == BLACK_PLAYER) {
+    if (computerPlayer == BLACK_PLAYER) {
       sign = 1;
     } else {
       sign = -1;
