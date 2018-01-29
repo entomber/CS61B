@@ -139,7 +139,6 @@ public class GameBoardTest {
     for (int[] move : whiteMoves) {
       board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
     }
-    System.out.println(board);
     // first step move: in goal area
     MoveWithPlayer m1 = new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(0, 3, 0, 1, WHITE_PLAYER);

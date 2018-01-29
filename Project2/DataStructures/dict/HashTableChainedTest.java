@@ -124,13 +124,11 @@ public class HashTableChainedTest {
 
     table.insert(key1, value1);
     Entry entry = table.find(key1);
-    System.out.println(key1.hashCode());
     assertEquals("Should find entry.", value1, entry.value());
 
     Integer[] b = {1, 2};
     IntegerArray key1New = new IntegerArray(b);
     entry = table.find(key1New);
-    System.out.println(key1New.hashCode());
     assertEquals("Should find entry.", key1New, entry.key());
   }
 

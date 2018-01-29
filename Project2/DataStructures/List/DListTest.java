@@ -12,20 +12,6 @@ import static org.junit.Assert.assertTrue;
 public class DListTest {
 
   @Test
-  public void hashCode_test() {
-    List<Integer[]> list1 = new DList<Integer[]>();
-    Integer[] a = { 1, 2 };
-    list1.insertBack(a);
-
-    List<Integer[]> list2 = new DList<Integer[]>();
-    Integer[] b = { 1, 2 };
-    list2.insertBack(b);
-
-    System.out.println(list1.hashCode());
-    System.out.println(list2.hashCode());
-  }
-
-  @Test
   public void iterator_empty() {
     List<Integer> list = new DList<Integer>();
     assertFalse("Should be empty.", list.iterator().hasNext());

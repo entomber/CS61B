@@ -8,17 +8,17 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * GameTree is a
+ * GameTree performs a search given a board, player color and search depths for add and step moves.
  *
- * alphaBeta() finds the best move for a player.  It uses a minimax algorithm with alpha-beta pruning and evaluation
- * function to aggressively prune branches.  The move and score for a board configuration are stored in a
- * transposition table for quick lookup so same board configurations do not need to be evaluated twice. It is only
- * useful if searching at least 3 levels deep where repeat moves board configurations for a player may occur.
+ * Call search() to get the best move up to max depth.  It utilizes:
+ *  - minimax search with alpha-beta pruning,
+ *  - iterative deepening: allows us to find the best best move at a given depth
+ *  - transposition table: speeds up iterative deepening by letting us look up prior depth's evaluated board states,
+ *      and speeds up search by storing/retrieving transpositions
+ *  - move reordering: by static evaluating all single depth moves we can enhance cutoff in alpha-beta pruning
  *
  * Credit to Jeroen W.T. Carolus' 'Alpha-Beta with Sibling Prediction Pruning in Chess'
  * (https://homepages.cwi.nl/~paulk/theses/Carolus.pdf (pg. 14) for explanation and pseudo code for transpostion tables.
- *
- *
  */
 public class GameTree {
   /**
@@ -30,8 +30,8 @@ public class GameTree {
    * ESTIMATED_TABLE_ENTRIES is the estimated number of entries in the transposition table.
    * computerPlayer is the current player, either BLACK_PLAYER or WHITE_PLAYER.
    * opponentPlayer is the opponent player, either BLACK_PLAYER or WHITE_PLAYER.
-   * depthLimitAddMove is the maximum search depth for add moves.
-   * depthLimitStepMove is the maximum search depth for step moves.
+   * searchDepthAdd is the maximum search depth for add moves.
+   * searchDepthStep is the maximum search depth for step moves.
    * board is the current game board state.
    * table is a transposition table, keys: zobrist hash of board, values: Best (move, score and cutoff values).
    * winner holds the winner if there is one.
@@ -53,10 +53,6 @@ public class GameTree {
   private int winner;
   private boolean isWin;
 
-  private int lookup;
-  private int store;
-  private int nodeCount;
-
   public GameTree(GameBoard board, int playerColor, int searchDepthAdd, int searchDepthStep) {
     computerPlayer = playerColor;
     if (computerPlayer == BLACK_PLAYER) {
@@ -72,36 +68,24 @@ public class GameTree {
   }
 
   /**
-   * iterativeDeepeningSearch() searches the game tree for the best move utilizing:
-   *  - minimax search with alpha-beta pruning,
-   *  - iterative deepening,
-   *  - transposition table,
-   *  - move reordering based on static evaluation of single depth move to enhance cutoff in alpha-beta pruning
-
-   * @return the best MoveWithPlayer encountered up to the search depth
+   * search() returns the best move for the player.
+   *
+   * @return the best move encountered up to the search depth
    */
-  protected MoveWithPlayer iterativeDeepeningSearch() {
+  protected MoveWithPlayer search() {
     double bestScore = -1.0;
     Best best = null;
-
-    lookup = 0;
-    store = 0;
-    nodeCount = 0;
 
     int blackChipCount = board.getBlackChips().length();
     int searchDepth = searchDepthAdd;
     if (blackChipCount == 10) {
       searchDepth = searchDepthStep;
     }
-//    long start = System.currentTimeMillis();
     for (int depth = 1; depth <= searchDepth; depth++) {
       Best bestAtCurrentDepth = alphaBeta(computerPlayer, depth, ALPHA, BETA);
       if (bestAtCurrentDepth.score > bestScore) {
         best = bestAtCurrentDepth;
         bestScore = bestAtCurrentDepth.score;
-        System.out.println("IDDFS - best at depth: " + depth + ", move: " + bestAtCurrentDepth.move +
-            ", score: " + bestAtCurrentDepth.score + ", bestScore: " + bestScore);
-        System.out.println("lookup: " + lookup + ", store: " + store + ", table size: " + table.size());
       }
 
       // stop searching if we find ANY winning move at depth 0
@@ -110,9 +94,6 @@ public class GameTree {
       }
     }
     table.makeEmpty(); // clean up transposition table
-
-//    long end = System.currentTimeMillis();
-//    System.out.println(nodeCount * 1000 / (end-start) + " nodes/s");
 
     // temp for testing
     if (best == null) {
@@ -124,13 +105,11 @@ public class GameTree {
 
   // minimax with alpha-beta pruning and transposition table
   private Best alphaBeta(int side, int depth, double alpha, double beta) {
-    nodeCount++;
     Best myBest = new Best(); // my best move
     Best reply; // opponent's best reply
 
     Best entryTT = getTTEntry(); // entry from the transposition table
     if (entryTT != null && entryTT.depth >= depth) {
-      lookup++;
       if (entryTT.valueType == Best.EXACT_VALUE) {
         return entryTT;
       }
@@ -147,13 +126,10 @@ public class GameTree {
     if (isGameOver() || depth == 0) {
       myBest.score = evaluateBoard(depth);
       if (myBest.score <= alpha) {
-        store++;
         storeTTEntry(myBest.move, myBest.score, Best.LOWER_BOUND, depth);
       } else if (myBest.score >= beta) {
-        store++;
         storeTTEntry(myBest.move, myBest.score, Best.UPPER_BOUND, depth);
       } else {
-        store++;
         storeTTEntry(myBest.move, myBest.score, Best.EXACT_VALUE, depth);
       }
       return myBest;
@@ -194,13 +170,10 @@ public class GameTree {
       }
     }
     if (myBest.score <= alpha) {
-      store++;
       storeTTEntry(myBest.move, myBest.score, Best.LOWER_BOUND, depth);
     } else if (myBest.score >= beta) {
-      store++;
       storeTTEntry(myBest.move, myBest.score, Best.UPPER_BOUND, depth);
     } else {
-      store++;
       storeTTEntry(myBest.move, myBest.score, Best.EXACT_VALUE, depth);
     }
     return myBest;

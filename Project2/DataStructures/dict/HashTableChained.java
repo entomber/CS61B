@@ -137,7 +137,6 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     }
     if ((double) (size + 1) / N >= THRESHOLD) {
       expandHashTable();
-      System.out.println("***EXPANDED*** " + size);
     }
 
     int index = compFunction(key.hashCode(), N);

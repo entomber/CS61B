@@ -28,7 +28,7 @@ public class MachinePlayer extends Player {
     }
     board = new GameBoard();
     searchDepthAdd = 5;
-    searchDepthStep = 2;
+    searchDepthStep = 4;
   }
 
   // Creates a machine player with the given color and search depth.  Color is
@@ -44,7 +44,7 @@ public class MachinePlayer extends Player {
   public Move chooseMove() {
     // make simple move
     GameTree gameTree = new GameTree(board, color, searchDepthAdd, searchDepthStep);
-    MoveWithPlayer move = gameTree.iterativeDeepeningSearch();
+    MoveWithPlayer move = gameTree.search();
     board.setChip(move);
     return move;
   }

@@ -21,8 +21,8 @@ public class GameTreeTest {
   @Before
   public void setup() {
     board = new GameBoard();
-    gameTreeBlack = new GameTree(board, BLACK_PLAYER, 5, 2);
-    gameTreeWhite = new GameTree(board, WHITE_PLAYER, 5, 2);
+    gameTreeBlack = new GameTree(board, BLACK_PLAYER, 5, 4);
+    gameTreeWhite = new GameTree(board, WHITE_PLAYER, 5, 4);
   }
 
   @After
@@ -46,7 +46,7 @@ public class GameTreeTest {
     assertTrue("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
 
     expectedResult = new MoveWithPlayer(3, 3, BLACK_PLAYER);
-      actualResultIterative = gameTreeBlack.iterativeDeepeningSearch();
+      actualResultIterative = gameTreeBlack.search();
     assertNull("Iterative search should return null.", actualResultIterative);
   }
 
@@ -60,7 +60,7 @@ public class GameTreeTest {
     assertFalse("Board should not have a valid network.", board.hasValidNetwork(BLACK_PLAYER));
 
     expectedResult = new MoveWithPlayer(1, 0, BLACK_PLAYER);
-    actualResultIterative = gameTreeBlack.iterativeDeepeningSearch();
+    actualResultIterative = gameTreeBlack.search();
     assertEquals("Move should be correct.", expectedResult, actualResultIterative);
   }
 
@@ -74,7 +74,7 @@ public class GameTreeTest {
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     assertFalse("Board should not have a valid network.", board.hasValidNetwork(BLACK_PLAYER));
     expectedResult = new MoveWithPlayer(3, 3, BLACK_PLAYER);
-    actualResultIterative = gameTreeBlack.iterativeDeepeningSearch();
+    actualResultIterative = gameTreeBlack.search();
     assertEquals("Move should be correct.", expectedResult, actualResultIterative);
   }
 
@@ -94,33 +94,50 @@ public class GameTreeTest {
       } else {
         gameTree = gameTreeWhite;
       }
-      board.setChip(gameTree.iterativeDeepeningSearch());
+      board.setChip(gameTree.search());
     }
-    System.out.println(board);
     assertTrue("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
 
+  // test chooseMove() with a few step moves
+  @Test
+  public void chooseMove_stepMoves() {
+    int[][] whiteMoves = {{1, 1}, {5, 6}, {5, 4}, {2, 4}, {4, 4}, {2, 3}, {4, 1}, {6, 1}, {2, 6}, {2, 1} };
+    int[][] blackMoves = {{3, 2}, {1, 2}, {3, 3}, {1, 4}, {6, 5}, {1, 6}, {3, 5}, {5, 5}, {5, 1}, {6, 3} };
+    for (int[] move : whiteMoves) {
+      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
+    }
+    for (int[] move : blackMoves) {
+      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
+    }
+    board.setChip(gameTreeWhite.search());
+    board.setChip(gameTreeBlack.search());
+    board.setChip(gameTreeWhite.search());
+    assertTrue("Board has a valid network.", board.hasValidNetwork(WHITE_PLAYER));
+  }
+
+  // test chooseMove() through 5 turns
   @Test
   public void chooseMove_playFiveTurns() {
     int turns = 5;
-    int depth = 5;
     for (int i = 0; i < turns; i++) {
-      board.setChip(gameTreeWhite.iterativeDeepeningSearch());
-      board.setChip(gameTreeBlack.iterativeDeepeningSearch());
+      board.setChip(gameTreeWhite.search());
+      board.setChip(gameTreeBlack.search());
     }
-    System.out.println(board);
+    // System.out.println(board);
   }
 
+  // test chooseMove() through 10 turns
   @Test
   public void chooseMove_playTenTurns() {
     int turns = 10;
     for (int i = 0; i < turns; i++) {
-      MoveWithPlayer whiteMove = gameTreeWhite.iterativeDeepeningSearch();
+      MoveWithPlayer whiteMove = gameTreeWhite.search();
       if (whiteMove == null) {
         break;
       }
       board.setChip(whiteMove);
-      MoveWithPlayer blackMove = gameTreeBlack.iterativeDeepeningSearch();
+      MoveWithPlayer blackMove = gameTreeBlack.search();
       if (blackMove == null) {
         break;
       }
@@ -128,7 +145,7 @@ public class GameTreeTest {
     }
     assertTrue("A player made a valid network.", board.hasValidNetwork(BLACK_PLAYER) ||
         board.hasValidNetwork(WHITE_PLAYER));
-    System.out.println(board);
+    // System.out.println(board);
   }
 }
 

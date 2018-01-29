@@ -11,6 +11,15 @@ import time
 """
 This script is a testing framework for the Network game.
 
+It can be called like below:
+py test.py m m 10 4
+
+The first two arguments passed in represent the first and second player, and can be either 'm' or 'r'.  In this case, both
+players are machine players.  The third argument passed in represents the number of games played, in this case 10.  The
+fourth argument passed in represents the number of games played concurrently (recommend no more than number of logical cores),
+and if left blank runs # logical cores concurrently (i.e. if you have 4 logical cores, it will run 4 games in parallel).
+
+
 https://stackoverflow.com/questions/26774781/python-multiple-subprocess-with-a-pool-queue-recover-output-as-soon-as-one-finis
 https://stackoverflow.com/questions/6893968/how-to-get-the-return-value-from-a-thread-in-python
 
@@ -20,8 +29,7 @@ def main(argv):
 	(player_1, player_2, iterations, threads) = parse_input()
 	command = ['java', 'Network', '-q', player_1, player_2]
 
-	print(argv)
-	print((player_1, player_2, iterations, threads))
+	print('p1: %s, p2: %s, iterations: %d, threads: %s'  %(player_1, player_2, iterations, threads))
 
 	sys.stdout.flush()
 
@@ -44,7 +52,6 @@ def main(argv):
 			p2_wins += 1
 			p2_moves_count.append(moves_count)
 			p2_moves.extend(moves)
-	# print([result.get() for result in results])
 	pool.close()
 	pool.join()
 
