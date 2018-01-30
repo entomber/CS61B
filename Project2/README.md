@@ -1,16 +1,21 @@
 # Project 2: Network (The Game)
 
-This is my implementation of the second project for CS61B Data Structures (Spring 2014).  The purpose of this project is to implement a computer player that plays the Network game against a human player or another computer player.  See [readme.pdf](https://github.com/entomber/CS61B/blob/master/Project2/readme.pdf) or [readme.txt](https://github.com/entomber/CS61B/blob/master/Project2/readme.txt) for the full project description and requirements.
+This is my implementation of the second project for CS61B Data Structures (Spring 2014).  The purpose of this project is to implement a computer player that plays the Network game against a human player or another computer player.  See [readme.pdf](readme.pdf) or [readme.txt](readme.txt) for the full project description and requirements.
+
+![Example game](example_game.png "Example of a network game where black player won")
 
 ## Getting Started
 
 1. Clone the repository
 2. Compile all the code like below on Windows from the root directory:
+
 ```
 javac -cp ".;test-lib/*" player/*.java
 
 ```
+
 3. Run Network with the following arguments from the root directory:
+
 ```
 java Network {player1} {player2}
 ```
@@ -18,6 +23,7 @@ java Network {player1} {player2}
 **{player1}** has the first turn and **{player2}** has the second turn.
 
 A player can be one of the following:
+
 ```
 machine
 human
@@ -25,6 +31,7 @@ random
 ```
 
 For example, the below arguments starts a game with the human player taking the first turn and machine player taking the second:
+
 ```
 java Network human machine
 ```
@@ -58,7 +65,9 @@ py test.py m m 200 4
 ### Unit tests
 
 All unit tests within the project can be run like below:
+
 ```
 java -cp ".;test-lib/*" org.junit.runner.JUnitCore player.AllTests
 ```
-Check [AllTests.java](https://github.com/entomber/CS61B/blob/master/Project2/player/AllTests.java) for the test classes ran.
+
+Check [AllTests.java](player/AllTests.java) for the test classes ran.
