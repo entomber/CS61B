@@ -258,6 +258,13 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     size = 0;
   }
 
+  /**
+   *  iterator() returns a newly created Iterator that can iterate through
+   *  this HashTableChained.
+   *
+   *  @return a newly created Iterator object set to the first Entry in this
+   *  HashTableChained.
+   */
   @Override
   public Iterator<Entry> iterator() {
     return new HashTableIterator();

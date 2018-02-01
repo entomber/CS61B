@@ -157,6 +157,13 @@ public class DList<E> extends List<E> {
     return sb.toString();
   }
 
+  /**
+   *  iterator() returns a newly created Iterator that can iterate through
+   *  this DList.
+   *
+   *  @return a newly created Iterator object set to the first DListNode of
+   *  this DList.
+   */
   @Override
   public Iterator<E> iterator() {
     return new DListIterator();

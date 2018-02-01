@@ -143,6 +143,13 @@ public class Stack<E> extends StackInterface<E> {
     return sb.toString();
   }
 
+  /**
+   *  iterator() returns a newly created Iterator that can iterate through
+   *  this Stack.
+   *
+   *  @return a newly created Iterator object set to the first item of
+   *  this Stack.
+   */
   @Override
   public Iterator<E> iterator() {
     return new StackIterator();
