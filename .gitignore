@@ -1,0 +1,17 @@
+# Compiled class file
+**.class
+
+# Log file
+**.log
+
+# workspace files are user-specific
+**.sublime-workspace
+
+# Intellij project files/folders
+**/.idea
+**/out
+**.iml
+
+# Microsoft office files
+**.docx
+**.xlsx
