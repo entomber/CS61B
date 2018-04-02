@@ -2,6 +2,10 @@
 
 package graph;
 
+import dict.Dictionary;
+import dict.HashTableChained;
+import list.List;
+
 /**
  * The WUGraph class represents a weighted, undirected graph.  Self-edges are
  * permitted.
@@ -10,25 +14,45 @@ package graph;
 public class WUGraph {
 
   /**
+   * V stores the number of vertices
+   * E stores the number of edges
+   * adj is an adjacency list that stores lists of vertices adjacent to a vertex
+   * table maps an Object to an index in the adjacency list
+   */
+  private int V;
+  private int E;
+  private List<Integer>[] adj;
+  private Dictionary table;
+  private int index;
+
+  /**
    * WUGraph() constructs a graph having no vertices or edges.
    *
    * Running time:  O(1).
    */
-  public WUGraph();
+  public WUGraph() {
+    V = 0;
+    E = 0;
+    table = new HashTableChained();
+  }
 
   /**
    * vertexCount() returns the number of vertices in the graph.
    *
    * Running time:  O(1).
    */
-  public int vertexCount();
+  public int vertexCount() {
+    return V;
+  }
 
   /**
    * edgeCount() returns the total number of edges in the graph.
    *
    * Running time:  O(1).
    */
-  public int edgeCount();
+  public int edgeCount() {
+    return E;
+  }
 
   /**
    * getVertices() returns an array containing all the objects that serve
@@ -51,7 +75,13 @@ public class WUGraph {
    *
    * Running time:  O(1).
    */
-  public void addVertex(Object vertex);
+  public void addVertex(Object vertex) {
+    if (table.find(vertex) != null) {
+      return;
+    }
+    table.insert(vertex, index); // associates vertex with index
+    index++;
+  }
 
   /**
    * removeVertex() removes a vertex from the graph.  All edges incident on the
@@ -68,7 +98,9 @@ public class WUGraph {
    *
    * Running time:  O(1).
    */
-  public boolean isVertex(Object vertex);
+  public boolean isVertex(Object vertex) {
+    return table.find(vertex) != null;
+  }
 
   /**
    * degree() returns the degree of a vertex.  Self-edges add only one to the
