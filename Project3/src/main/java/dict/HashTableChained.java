@@ -249,7 +249,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
 
   // shrinks the hash table when load factor < 0.25
   private void shrinkHashTable() {
-
+    // TODO: implement and test
   }
 
   /**
