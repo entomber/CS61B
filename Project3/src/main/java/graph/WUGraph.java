@@ -139,20 +139,8 @@ public class WUGraph {
     vertexCount--;
   }
 
-  // returns the adjacency list of the given vertex
-  private List<Edge> getAdjList(Object vertex) {
-    ListNode<List<Edge>> node = (ListNode<List<Edge>>) vertexToAdjList.find(vertex).value();
-    List<Edge> adjList = null;
-    try {
-      adjList = node.item();
-    } catch (InvalidNodeException e) {
-      e.printStackTrace();
-    }
-    return adjList;
-  }
-
   // returns a shallow copy of the given list
-  private List<Edge> createCopy(List<Edge> targetAdjList) {
+  private static List<Edge> createCopy(List<Edge> targetAdjList) {
     List<Edge> copy = new DList<Edge>();
     for (Edge edge : targetAdjList) {
       copy.insertBack(edge);
@@ -205,7 +193,26 @@ public class WUGraph {
    *
    * Running time:  O(d), where d is the degree of "vertex".
    */
-  public Neighbors getNeighbors(Object vertex);
+  public Neighbors getNeighbors(Object vertex) {
+    if (degree(vertex) == 0) { // degree returns 0 if vertex not in graph or has degree zero
+      return null;
+    }
+    Neighbors neighbors = new Neighbors();
+    List<Edge> adjList = getAdjList(vertex);
+    neighbors.neighborList = new Object[adjList.length()];
+    neighbors.weightList = new int[adjList.length()];
+    int i = 0;
+    for (Edge edge : adjList) {
+      if (vertex.equals(edge.u) && edge.u != edge.v) {
+        neighbors.neighborList[i] = edge.v;
+      } else {
+        neighbors.neighborList[i] = edge.u;
+      }
+      neighbors.weightList[i] = edge.weight;
+      i++;
+    }
+    return neighbors;
+  }
 
   /**
    * addEdge() adds an edge (u, v) to the graph.  If either of the parameters
@@ -234,7 +241,6 @@ public class WUGraph {
         List<Edge> vAdjList = getAdjList(v);
         vAdjList.insertBack(edge);
         edge.second = vAdjList.back();
-        edgeCount++;
         updateDegree(v, 1);
       }
     } else { // edge exists, update the weight
@@ -243,21 +249,16 @@ public class WUGraph {
     }
   }
 
-  // updates the degree in vertexToDegree map by adding given value
-  private void updateDegree(Object vertex, int addToDegree) {
-    int degree;
-    if (vertexToDegree.find(vertex) == null) {
-      degree = 0;
-    } else {
-      degree = (Integer) vertexToDegree.find(vertex).value();
+  // returns the adjacency list of the given vertex
+  private List<Edge> getAdjList(Object vertex) {
+    ListNode<List<Edge>> node = (ListNode<List<Edge>>) vertexToAdjList.find(vertex).value();
+    List<Edge> adjList = null;
+    try {
+      adjList = node.item();
+    } catch (InvalidNodeException e) {
+      e.printStackTrace();
     }
-    if (addToDegree == 1 || addToDegree == -1) {
-      degree += addToDegree;
-      vertexToDegree.remove(vertex);
-      vertexToDegree.insert(vertex, degree);
-    } else {
-      throw new IllegalArgumentException();
-    }
+    return adjList;
   }
 
   /**
@@ -278,7 +279,6 @@ public class WUGraph {
       // remove edge from other vertex's list not self-edge
       if (edge.second != null) {
         edge.second.remove();
-        edgeCount--;
         updateDegree(v, -1);
       }
       edge.first.remove();
@@ -288,6 +288,23 @@ public class WUGraph {
       e.printStackTrace();
     }
     vertexPairToEdge.remove(pair);
+  }
+
+  // updates the degree in vertexToDegree map by adding given value
+  private void updateDegree(Object vertex, int addToDegree) {
+    int degree;
+    if (vertexToDegree.find(vertex) == null) {
+      degree = 0;
+    } else {
+      degree = (Integer) vertexToDegree.find(vertex).value();
+    }
+    if (addToDegree == 1 || addToDegree == -1) {
+      degree += addToDegree;
+      vertexToDegree.remove(vertex);
+      vertexToDegree.insert(vertex, degree);
+    } else {
+      throw new IllegalArgumentException();
+    }
   }
 
   /**

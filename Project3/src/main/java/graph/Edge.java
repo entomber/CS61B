@@ -25,7 +25,6 @@ class Edge {
   protected ListNode first;
   protected ListNode second;
 
-
   /**
    * Constructs a new Edge object.
    * @param u the first vertex.
