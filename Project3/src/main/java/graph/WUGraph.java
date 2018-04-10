@@ -235,18 +235,23 @@ public class WUGraph {
       uAdjList.insertBack(edge);
       edge.first = uAdjList.back();
       edgeCount++;
-      updateDegree(u, 1);
+      incrementDegree(u);
       // not a self-edge, add edge to other adj list and update edge's second reference
       if (!u.equals(v)) {
         DList<Edge> vAdjList = getAdjList(v);
         vAdjList.insertBack(edge);
         edge.second = vAdjList.back();
-        updateDegree(v, 1);
+        incrementDegree(v);
       }
     } else { // edge exists, update the weight
       Edge edge = (Edge) vertexPairToEdge.find(pair).value();
       edge.weight = weight;
     }
+  }
+
+  // increments the degree of the vertex by 1
+  private void incrementDegree(Object vertex) {
+    updateDegree(vertex, 1);
   }
 
   // returns the adjacency list of the given vertex
@@ -279,15 +284,20 @@ public class WUGraph {
       // remove edge from other vertex's list not self-edge
       if (edge.second != null) {
         edge.second.remove();
-        updateDegree(v, -1);
+        decrementDegree(v);
       }
       edge.first.remove();
       edgeCount--;
-      updateDegree(u, -1);
+      decrementDegree(u);
     } catch (InvalidNodeException e) {
       e.printStackTrace();
     }
     vertexPairToEdge.remove(pair);
+  }
+
+  // decrements the degree of the vertex by 1
+  private void decrementDegree(Object vertex) {
+    updateDegree(vertex, -1);
   }
 
   // updates the degree in vertexToDegree map by adding given value
@@ -298,13 +308,9 @@ public class WUGraph {
     } else {
       degree = (Integer) vertexToDegree.find(vertex).value();
     }
-    if (addToDegree == 1 || addToDegree == -1) {
-      degree += addToDegree;
-      vertexToDegree.remove(vertex);
-      vertexToDegree.insert(vertex, degree);
-    } else {
-      throw new IllegalArgumentException();
-    }
+    degree += addToDegree;
+    vertexToDegree.remove(vertex);
+    vertexToDegree.insert(vertex, degree);
   }
 
   /**

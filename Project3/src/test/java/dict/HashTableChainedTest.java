@@ -208,6 +208,24 @@ public class HashTableChainedTest {
   }
 
   @Test
+  public void insert_shrinkTable() throws IllegalAccessException {
+    table = new HashTableChained(5);
+
+    int[][] items = { {1,1}, {2,2}, {3,3} };
+    for (int i = 0; i < items.length; i++) {
+      int key = items[i][0];
+      int value = items[i][1];
+      table.insert(key, value);
+    }
+    assertEquals("Table has incorrect N value.", 11, (int)(Integer) field.get(table));
+    table.remove(3);
+    assertEquals("Table has incorrect N value after remove.", 5, (int)(Integer) field.get(table));
+    assertEquals("All entries found.", 1, table.find(1).value);
+    assertEquals("All entries found.", 2, table.find(2).value);
+    assertEquals("Removed entry should not be found.", null, table.find(3));
+  }
+
+  @Test
   public void iterator_empty() {
     assertFalse("Should be empty.", table.iterator().hasNext());
   }

@@ -25,13 +25,15 @@ import java.util.NoSuchElementException;
 public class HashTableChained implements Dictionary, Iterable<Entry> {
 
   /**
-   *  THRESHOLD is the load factor (size/N) threshold.
+   *  LOWER_THRESHOLD is the lower load factor (size/N) threshold to hit before shrinking the table.
+   *  UPPER_THRESHOLD is the upper load factor (size/N) threshold to hit before expanding the table.
    *  DEFAULT_SIZE is the default size of the table when no initial size is supplied to the constructor.
    *  size is the number of entries in the dictionary.
    *  N is the number of buckets in the dictionary.
    *  table stores lists of entries.
    **/
-  private final static double THRESHOLD = 0.75;
+  private final static double LOWER_THRESHOLD = 0.25;
+  private final static double UPPER_THRESHOLD = 0.75;
   private final static int DEFAULT_SIZE = 50;
   private int size;
   private int N;
@@ -61,7 +63,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     this(DEFAULT_SIZE);
   }
 
-  // returns the first prime number after the input number
+  // returns input if prime or the first prime number after input
   private int getFirstPrimeAfter(int x) {
     int prime = x;
     boolean primeFound = false;
@@ -135,7 +137,7 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     if (key == null) {
       return null;
     }
-    if ((double) (size + 1) / N >= THRESHOLD) {
+    if ((double) (size + 1) / N >= UPPER_THRESHOLD) {
       expandHashTable();
     }
 
@@ -154,9 +156,14 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     return entry;
   }
 
-  // expands the hash table when load factor >= 0.75
+  // doubles the size of the hash table when load factor >= 0.75
   private void expandHashTable() {
-    int newN = getFirstPrimeAfter(N * 2);
+    changeTableSize(2);
+  }
+
+  // new table size is updated by multiplier given
+  private void changeTableSize(double multiplier) {
+    int newN = getFirstPrimeAfter( (int)(N * multiplier) );
     Object[] newTable = new Object[newN];
     for (Entry entry : this) {
       int index = compFunction(entry.key.hashCode(), newN);
@@ -224,11 +231,16 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     if (key == null) {
       return null;
     }
+    if (((double) (size - 1) / N) < LOWER_THRESHOLD) {
+      shrinkHashTable();
+    }
+
     int index = compFunction(key.hashCode(), N);
     // No list for key mapped to bucket, return null
     if (table[index] == null) {
       return null;
     }
+
     // List exists for key mapped to bucket, check for an entry in the list with same key
     List<Entry> list = (List<Entry>) table[index];
     Iterator<Entry> iter = list.iterator();
@@ -247,9 +259,9 @@ public class HashTableChained implements Dictionary, Iterable<Entry> {
     return null;
   }
 
-  // shrinks the hash table when load factor < 0.25
+  // reduces the size of the hash table by half when load factor < 0.25
   private void shrinkHashTable() {
-    // TODO: implement and test
+    changeTableSize(0.5);
   }
 
   /**
