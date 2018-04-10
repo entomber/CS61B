@@ -5,9 +5,9 @@ package graph;
 import dict.Dictionary;
 import dict.HashTableChained;
 import list.DList;
-import list.InvalidNodeException;
-import list.List;
+import list.DListNode;
 import list.ListNode;
+import list.InvalidNodeException;
 
 /**
  * The WUGraph class represents a weighted, undirected graph.  Self-edges are
@@ -21,16 +21,16 @@ public class WUGraph {
    * edgeCount stores the number of edges
    * vertices is an adjacency list that stores lists of edges incident to a vertex
    * vertexToDegree maps a vertex Object to its degree
-   * vertexToAdjList maps a vertex Object to a ListNode that stores its adjacency list
-   * adjListToVertex maps a ListNode that stores an adjacency list to its vertex Object
+   * vertexToAdjList maps a vertex Object to a DListNode that stores its adjacency list
+   * adjListToVertex maps a DListNode that stores an adjacency list to its vertex Object
    * vertexPairToEdge maps a VertexPair to an Edge
    */
   private int vertexCount;
   private int edgeCount;
-  private List<List<Edge>> vertices;
+  private DList<DList<Edge>> vertices;
   private Dictionary vertexToDegree;    // Object(vertex)  -->  Integer(vertex's degree)
-  private Dictionary vertexToAdjList;   // Object(vertex)  -->  ListNode<List<Edge>>
-  private Dictionary adjListToVertex;   // ListNode<List<Edge>>  -->  Object(vertex)
+  private Dictionary vertexToAdjList;   // Object(vertex)  -->  DListNode<DList<Edge>>
+  private Dictionary adjListToVertex;   // DListNode<DList<Edge>>  -->  Object(vertex)
   private Dictionary vertexPairToEdge;  // VertexPair  -->  Edge
 
   /**
@@ -41,7 +41,7 @@ public class WUGraph {
   public WUGraph() {
     vertexCount = 0;
     edgeCount = 0;
-    vertices = new DList<List<Edge>>();
+    vertices = new DList<DList<Edge>>();
     vertexToDegree = new HashTableChained();
     vertexToAdjList = new HashTableChained();
     adjListToVertex = new HashTableChained();
@@ -80,7 +80,7 @@ public class WUGraph {
    */
   public Object[] getVertices() {
     Object[] v = new Object[vertices.length()];
-    ListNode<List<Edge>> node = vertices.front();
+    ListNode<DList<Edge>> node = vertices.front();
     for (int i = 0; i < vertices.length(); i++) {
       try {
         v[i] = adjListToVertex.find(node).value();
@@ -121,13 +121,13 @@ public class WUGraph {
       return;
     }
     // create shallow copy of list, and iterate over it to remove edges
-    List<Edge> targetAdjList = getAdjList(vertex);
-    List<Edge> copyAdjList = createCopy(targetAdjList);
+    DList<Edge> targetAdjList = getAdjList(vertex);
+    DList<Edge> copyAdjList = createCopy(targetAdjList);
     for (Edge edge : copyAdjList) {
       removeEdge(edge.u, edge.v);
     }
     // remove adjacency list for the vertex
-    ListNode<List<Edge>> node = (ListNode<List<Edge>>) vertexToAdjList.find(vertex).value();
+    DListNode<DList<Edge>> node = (DListNode<DList<Edge>>) vertexToAdjList.find(vertex).value();
     try {
       node.remove();
     } catch (InvalidNodeException e) {
@@ -140,8 +140,8 @@ public class WUGraph {
   }
 
   // returns a shallow copy of the given list
-  private static List<Edge> createCopy(List<Edge> targetAdjList) {
-    List<Edge> copy = new DList<Edge>();
+  private static DList<Edge> createCopy(DList<Edge> targetAdjList) {
+    DList<Edge> copy = new DList<Edge>();
     for (Edge edge : targetAdjList) {
       copy.insertBack(edge);
     }
@@ -198,7 +198,7 @@ public class WUGraph {
       return null;
     }
     Neighbors neighbors = new Neighbors();
-    List<Edge> adjList = getAdjList(vertex);
+    DList<Edge> adjList = getAdjList(vertex);
     neighbors.neighborList = new Object[adjList.length()];
     neighbors.weightList = new int[adjList.length()];
     int i = 0;
@@ -231,14 +231,14 @@ public class WUGraph {
     if (!isEdge(u, v)) {
       Edge edge = new Edge(u, v, weight);
       vertexPairToEdge.insert(pair, edge);
-      List<Edge> uAdjList = getAdjList(u);
+      DList<Edge> uAdjList = getAdjList(u);
       uAdjList.insertBack(edge);
       edge.first = uAdjList.back();
       edgeCount++;
       updateDegree(u, 1);
       // not a self-edge, add edge to other adj list and update edge's second reference
       if (!u.equals(v)) {
-        List<Edge> vAdjList = getAdjList(v);
+        DList<Edge> vAdjList = getAdjList(v);
         vAdjList.insertBack(edge);
         edge.second = vAdjList.back();
         updateDegree(v, 1);
@@ -250,9 +250,9 @@ public class WUGraph {
   }
 
   // returns the adjacency list of the given vertex
-  private List<Edge> getAdjList(Object vertex) {
-    ListNode<List<Edge>> node = (ListNode<List<Edge>>) vertexToAdjList.find(vertex).value();
-    List<Edge> adjList = null;
+  private DList<Edge> getAdjList(Object vertex) {
+    DListNode<DList<Edge>> node = (DListNode<DList<Edge>>) vertexToAdjList.find(vertex).value();
+    DList<Edge> adjList = null;
     try {
       adjList = node.item();
     } catch (InvalidNodeException e) {

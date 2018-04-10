@@ -1,0 +1,76 @@
+                                     GRADER
+
+====================================================================
+
+****************
+* WUGraph.java *
+****************
+
+--------------------------------------------------------------------
+Explanation of data structures used in the implementation of WUGraph
+--------------------------------------------------------------------
+
+1.
+Adjacency list:
+DList<DList<Edge>> vertices
+
+Edges are stored in adjacency lists which are represented with doubly-linked list.  The outer list represent vertices and the inner list the edges for each vertex.
+
+Doubly-linked list is used to ensure O(d) (where d = degree of the vertex) running time for removeVertex() and O(1) running time for removeEdge().  If we know the node we want to remove, in a doubly-linked list it would take O(1) time to remove it, but in a singly-linked list it would take O(n) time.
+
+
+2.
+(Vertex <--> Adjacency list) hash tables:
+Dictionary vertexToAdjList
+Dictionary adjListToVertex
+
+There are two hash tables to map between the Object vertex passed into our application and the ListNode in the vertices list which stores that vertex's adjacency list.  This ensures O(1) running time for the lookup of a vertex's adjacency list given an Object vertex, or lookup the actual vertex Object given the DListNode that stores the vertex's adjacency list.
+
+
+3.  
+(Vertex --> Degree of vertex) hash table:
+Dictionary vertexToDegree
+
+A hashtable is used to maintain the degree of a vertex.  This ensures O(1) running time for degree().
+
+
+4.  
+VertexPair --> Edge:
+Dictionary vertexPairToEdge
+
+A hashtable is used to map a VertexPair to an Edge stored in the adjacency list of the edge's vertices (or vertex given a self-edge).
+
+
+5.
+Edge
+An Edge data structure represents a weighted undirected edge in a WUGraph.  It has fields for the vertices of the edge, weight, and the DListNodes in the adjacency list(s) which store the edge. 
+
+--------------------------------------------------------------------
+Explain choices made in implementation to ensure removeVertex() runs 
+in O(d) time (Part I, design element[4]).
+--------------------------------------------------------------------
+
+I choose option [iii] in design element[4], using a single Edge object stored in both vertex's adjacency lists with references to both DListNodes its stored in (or single DListNode for self-edge).  This implementation seemed more straightforward than option [i] as only 1 edge is required.
+
+removeVertex() looks up the vertex's adjacency list in the hash table vertexToAdjList, and then: 
+(1) iterates through the degree d edges in the list, and remove each by calling DListNode.remove on the edge which takes O(d) time.
+(2) removes the vertex (by removing its adjacency list) from vertices list which takes O(1) time by looking up the DListNode the vertex is stored in using vertexToAdjList hash table.
+(3) removes the vertex and its adjacency list from adjListToVertex and vertexToAdjList hash tables which takes O(1) time.
+
+
+-------------------------------------------------------------------
+Explain choices made in implementation to ensure getVertices() runs
+in O(|V|) time (design element[2]).
+-------------------------------------------------------------------
+
+All vertices in the graph are stored in a vertices list (doubly-linked list) which stores V vertices.  We can iterate through this list and determine the vertex Object passed into our applicaton by looking it up in the hash table adjListToVertex which takes O(1) running time.  This ensures O(|V|) running time for getVertices().
+
+=====================================================================
+
+****************
+* Kruskal.java *
+****************
+
+--------------------------------------------------------------------
+Explanation of data structures used in the implementation of Kruskal
+--------------------------------------------------------------------
