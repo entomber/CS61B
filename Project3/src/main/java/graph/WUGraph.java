@@ -104,8 +104,8 @@ public class WUGraph {
       return;
     }
     vertices.insertBack(new DList<Edge>()); // create new adjacency list for vertex
-    vertexToAdjList.insert(vertex, vertices.back()); // associates vertex with adjacency list
-    adjListToVertex.insert(vertices.back(), vertex); // associates adjacency list with vertex
+    vertexToAdjList.insert(vertex, vertices.back());
+    adjListToVertex.insert(vertices.back(), vertex);
     vertexCount++;
   }
 
@@ -133,7 +133,7 @@ public class WUGraph {
     } catch (InvalidNodeException e) {
       e.printStackTrace();
     }
-    // remove vertex from both vertex maps
+    // vertex removed, update mappings
     adjListToVertex.remove(targetAdjList);
     vertexToAdjList.remove(vertex);
     vertexCount--;
@@ -203,6 +203,7 @@ public class WUGraph {
     neighbors.weightList = new int[adjList.length()];
     int i = 0;
     for (Edge edge : adjList) {
+      // not a self-edge, and vertex is edge.u, thus must be other vertex
       if (vertex.equals(edge.u) && edge.u != edge.v) {
         neighbors.neighborList[i] = edge.v;
       } else {
@@ -281,7 +282,7 @@ public class WUGraph {
     VertexPair pair = new VertexPair(u, v);
     Edge edge = (Edge) vertexPairToEdge.find(pair).value();
     try {
-      // remove edge from other vertex's list not self-edge
+      // not a self-edge, remove edge from other vertex's list
       if (edge.second != null) {
         edge.second.remove();
         decrementDegree(v);

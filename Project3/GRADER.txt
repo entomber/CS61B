@@ -10,11 +10,29 @@
 Explanation of data structures used in the implementation of WUGraph
 --------------------------------------------------------------------
 
+Summary
+-------
+
+Vertex:
+A vertex is represented as a DListNode (doubly-linked list node) in vertices DList (doubly-linked list).  Each vertex's adjacency list is the item in the DListNode, a DList<Edge>.
+
+There are two hash tables, vertexToAdjList and adjListToVertex, which map between an Object vertex passed into the application and the DListNode which stores the vertex's adjacency list.
+
+
+Edge:
+An edge is represented by an Edge object.  It has fields for vertices that make up the edge, weight, and the DListNodes in the adjacency list(s) where the edge is stored.  A self-edge only appears in one adjacency list, while normal edge appears in two different ones.
+
+A hash table, vertexPairToEdge, maps a VertexPair object to an Edge.
+
+
+Details
+-------
+
 1.
 Adjacency list:
 DList<DList<Edge>> vertices
 
-Edges are stored in adjacency lists which are represented with doubly-linked list.  The outer list represent vertices and the inner list the edges for each vertex.
+Edges are stored in adjacency lists which are represented with doubly-linked lists.  The outer list represent vertices and the inner list the edges for each vertex.
 
 Doubly-linked list is used to ensure O(d) (where d = degree of the vertex) running time for removeVertex() and O(1) running time for removeEdge().  If we know the node we want to remove, in a doubly-linked list it would take O(1) time to remove it, but in a singly-linked list it would take O(n) time.
 
@@ -35,15 +53,11 @@ A hashtable is used to maintain the degree of a vertex.  This ensures O(1) runni
 
 
 4.  
-VertexPair --> Edge:
+(VertexPair --> Edge) hash table:
 Dictionary vertexPairToEdge
 
-A hashtable is used to map a VertexPair to an Edge stored in the adjacency list of the edge's vertices (or vertex given a self-edge).
+A hashtable is used to map a VertexPair to an Edge stored in the adjacency list of the edge's vertices (or single vertex given a self-edge).
 
-
-5.
-Edge
-An Edge data structure represents a weighted undirected edge in a WUGraph.  It has fields for the vertices of the edge, weight, and the DListNodes in the adjacency list(s) which store the edge. 
 
 --------------------------------------------------------------------
 Explain choices made in implementation to ensure removeVertex() runs 

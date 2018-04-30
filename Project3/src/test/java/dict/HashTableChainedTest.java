@@ -22,11 +22,6 @@ public class HashTableChainedTest {
     field.setAccessible(true);
   }
 
-  @After
-  public void tearDown() {
-    table.makeEmpty();
-  }
-
   @Test
   public void HashTableChained_parameter() throws IllegalAccessException {
     int[][] sizes = { {2,5}, {3,7}, {4,11}, {5,11}, {6,13}, {7,17}, {8,17}, {9,19} };
