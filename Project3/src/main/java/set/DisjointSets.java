@@ -41,6 +41,10 @@ public class DisjointSets {
    *  @param root2 the root of the other set.
    **/
   public void union(int root1, int root2) {
+    // do nothing if either root1 or root2 is not a root, or they are equal
+    if (array[root1] >= 0 || array[root2] >= 0 || root1 == root2) {
+      return;
+    }
     if (array[root2] < array[root1]) {                 // root2 has larger tree
       array[root2] += array[root1];        // update # of items in root2's tree
       array[root1] = root2;                              // make root2 new root
