@@ -10,7 +10,7 @@ import list.ListNode;
  * used.
  *
  */
-class Edge {
+public class Edge implements Comparable<Edge> {
 
   /**
    * u is one vertex
@@ -19,9 +19,9 @@ class Edge {
    * first is the ListNode the edge is stored at in u's adjacency list
    * second is the ListNode the edge is stored at in v's adjacency list (for non self-edges)
    */
-  protected final Object u;
-  protected final Object v;
-  protected int weight;
+  public final Object u;
+  public final Object v;
+  public int weight;
   protected ListNode first;
   protected ListNode second;
 
@@ -31,11 +31,22 @@ class Edge {
    * @param v the second vertex.
    * @param weight the edge weight.
    */
-  protected Edge(Object u, Object v, int weight) {
+  public Edge(Object u, Object v, int weight) {
     this.u = u;
     this.v = v;
     this.weight = weight;
     first = null;
     second = null;
+  }
+
+  public int compareTo(Edge other) {
+    int result = weight - other.weight;
+    if (result > 0) {
+      return 1;
+    } else if (result < 0) {
+      return -1;
+    } else {
+      return 0;
+    }
   }
 }
