@@ -2,7 +2,7 @@
 
 This is my implementation of the second project for CS61B Data Structures (Spring 2014).  The purpose of this project is to implement a computer player that plays the Network game against a human player or another computer player.  See [readme.pdf](readme.pdf) or [readme.txt](readme.txt) for the full project description and requirements.
 
-![Example game](example_game.png "Example of a network game where black player won")
+![Example game](example_game.gif "Example game between two machine players")
 
 ## Getting Started
 
