@@ -174,7 +174,7 @@ public class GameBoard {
       removeChipIfInGoal(move.x2, move.y2);
       grid[move.x2][move.y2] = NO_CHIP;
       grid[move.x1][move.y1] = chipColor;
-      updateZobristKey(move.x2, move.y2, NO_CHIP);
+      updateZobristKey(move.x2, move.y2, chipColor);
       updateZobristKey(move.x1, move.y1, chipColor);
     }
     // add move
@@ -256,7 +256,7 @@ public class GameBoard {
       chipPositions.insertBack(square);
       grid[lastMove.x1][lastMove.y1] = NO_CHIP;
       grid[lastMove.x2][lastMove.y2] = chipColor;
-      updateZobristKey(lastMove.x1, lastMove.y1, NO_CHIP);
+      updateZobristKey(lastMove.x1, lastMove.y1, chipColor);
       updateZobristKey(lastMove.x2, lastMove.y2, chipColor);
       // add to goal chip list
       if (isInLeftGoal(lastMove.x2, lastMove.y2)) {
@@ -277,7 +277,7 @@ public class GameBoard {
         blackChipCount--;
       }
       grid[lastMove.x1][lastMove.y1] = NO_CHIP;
-      updateZobristKey(lastMove.x1, lastMove.y1, NO_CHIP);
+      updateZobristKey(lastMove.x1, lastMove.y1, chipColor);
     }
     // remove if in goal list
     removeChipIfInGoal(lastMove.x1, lastMove.y1);
