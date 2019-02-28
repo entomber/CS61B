@@ -31,7 +31,7 @@ public class GameBoard {
    * BLACK_CHIP is stored in a square with a black chip.
    * DIR_x is the direction towards another chip
    *
-   * board is the internal representation of the game board.
+   * grid is the internal representation of the game board.
    * whiteChips is an int[][] of the white chip positions on the board.
    * blackChips is an int[][] of the black chip positions on the board.
    * whiteChipCount is the number of white chips on the board.
@@ -384,10 +384,6 @@ public class GameBoard {
     }
     // Player attempting add move when they have 10 or more chips on the board.
     if (move.moveKind == Move.ADD && chipCount == STEP_MOVE_THRESHOLD) {
-      return false;
-    }
-    // Player attempting step move to the same square.
-    if (move.moveKind == Move.STEP && move.x1 == move.x2 && move.y1 == move.y2) {
       return false;
     }
     return true;
