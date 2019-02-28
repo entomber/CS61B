@@ -88,3 +88,7 @@ All vertices in the graph are stored in a vertices list (doubly-linked list) whi
 --------------------------------------------------------------------
 Explanation of data structures used in the implementation of Kruskal
 --------------------------------------------------------------------
+
+Basically followed the algorithmic description to implement Kruskal's algorithm.  A linked list is used to store the edges instead of an array.  We don't know how many edges there are ahead of time because with the calls to getNeighbors, we generate 2 normal edges (duplicates) for a vertex pair while there's only 1 self-edge.  
+
+There will be duplicates added to the edge list, but that's okay.  A disjoint sets data structure is used to represent vertices connected to one another.  After adding the first pair to the MST, the second pair will be ignored since the vertices in the disjoint sets will be in the same set.  Also, the edge was just added in the MST so it cannot be added again anyways.
