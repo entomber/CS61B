@@ -3,6 +3,9 @@ package player;
 import DataStructures.List.List;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -21,10 +24,21 @@ public class GameBoardTest {
   private final static int LEFT = GameBoard.DIRECTION_LEFT;
   private final static int UP_LEFT = GameBoard.DIRECTION_UP_LEFT;
 
+  private GameBoard board;
+
+  @Before
+  public void setup() {
+    board = new GameBoard();
+  }
+
+  @After
+  public void tearDown() {
+    board = null;
+  }
+
   // test setChip() on a move out of the boundaries of the board.
   @Test
   public void setChip_outOfBounds() {
-    GameBoard board = new GameBoard();
     MoveWithPlayer m1 = new MoveWithPlayer(BOARD_SIZE, BOARD_SIZE, WHITE_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(-1, -1, WHITE_PLAYER);
     MoveWithPlayer m3 = new MoveWithPlayer(BOARD_SIZE, BOARD_SIZE, BLACK_PLAYER);
@@ -39,7 +53,6 @@ public class GameBoardTest {
   // test setChip() on a move to each corner.
   @Test
   public void setChip_corner() {
-    GameBoard board = new GameBoard();
     MoveWithPlayer m1 = new MoveWithPlayer(0, 0, WHITE_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(0, BOARD_SIZE-1, WHITE_PLAYER);
     MoveWithPlayer m3 = new MoveWithPlayer(BOARD_SIZE-1, 0, WHITE_PLAYER);
@@ -62,7 +75,6 @@ public class GameBoardTest {
   // test setChip() on a move to the wrong goal.
   @Test
   public void setChip_wrongGoal() {
-    GameBoard board = new GameBoard();
     MoveWithPlayer m1 = new MoveWithPlayer(BOARD_SIZE/2, 0, WHITE_PLAYER); // top goal
     MoveWithPlayer m2 = new MoveWithPlayer(BOARD_SIZE/2, BOARD_SIZE-1, WHITE_PLAYER); // bottom goal
     MoveWithPlayer m3 = new MoveWithPlayer(0, BOARD_SIZE/2, BLACK_PLAYER); // left goal
@@ -77,7 +89,6 @@ public class GameBoardTest {
   // test setChip() on a move to the correct goal.
   @Test
   public void setChip_correctGoal() {
-    GameBoard board = new GameBoard();
     MoveWithPlayer m1 = new MoveWithPlayer(BOARD_SIZE/2, 0, BLACK_PLAYER); // top goal
     MoveWithPlayer m2 = new MoveWithPlayer(BOARD_SIZE/2, BOARD_SIZE-1, BLACK_PLAYER); // bottom goal
     MoveWithPlayer m3 = new MoveWithPlayer(0, BOARD_SIZE/2, WHITE_PLAYER); // left goal
@@ -92,7 +103,6 @@ public class GameBoardTest {
   // test setChip() on a move to an already occupied square.
   @Test
   public void setChip_occupied() {
-    GameBoard board = new GameBoard();
     board.setChip(new MoveWithPlayer(BOARD_SIZE/2, BOARD_SIZE/2, WHITE_PLAYER));
     MoveWithPlayer m1 = new MoveWithPlayer(BOARD_SIZE/2, BOARD_SIZE/2, WHITE_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(BOARD_SIZE/2, BOARD_SIZE/2, BLACK_PLAYER);
@@ -106,12 +116,9 @@ public class GameBoardTest {
   // test setChip() on moves that would form a cluster.
   @Test
   public void setChip_clusters() {
-    GameBoard board = new GameBoard();
     // set up board like in "README" file "Legal moves" section
     int[][] initialMoves = { {3,0}, {2,1}, {2,4}, {1,6}, {5,2}, {5,3}, {6,5}, {4,7} };
-    for (int[] move : initialMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, initialMoves, BLACK_PLAYER);
 
     int[][] moves = { {1,0}, {2,0}, {4,0}, {1,1}, {3,1}, {4,1}, {5,1}, {6,1}, {1,2}, {2,2},
         {3,2}, {4,2}, {6,2}, {4,3}, {6,3}, {4,4}, {5,4}, {6,4}, {1,5}, {2,5}, {5,6}};
@@ -123,22 +130,33 @@ public class GameBoardTest {
     }
   }
 
+  // set moves on board for player
+  private void makeMoves(GameBoard board, int[][] moves, int player) {
+    // add move
+    if (moves[0].length == 2) {
+      for (int[] move : moves) {
+        board.setChip(new MoveWithPlayer(move[0], move[1], player));
+      }
+    }
+    // step move
+    else {
+      for (int[] move : moves) {
+        board.setChip(new MoveWithPlayer(move[0], move[1], move[2], move[3], player));
+      }
+    }
+  }
+
   // test setChip() on step moves that should not form clusters. Series of step moves below moves chip 1
   // that is adjacent to chip 2 to another position while maintaining adjacency with chip 2
   // (e.g. step move 1 to x position: 1 2 x -> x 2 1)
   @Test
   public void setChip_stepMoveDoNotCluster() {
-    GameBoard board = new GameBoard();
     // 10 black chips
     int[][] blackMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
     // 10 white chips
     int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {0,6}, {7,1}, {7,2}, {7,5}, {7,6}, {5,3}, {5,4} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
     // first step move: in goal area
     MoveWithPlayer m1 = new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(0, 3, 0, 1, WHITE_PLAYER);
@@ -160,17 +178,11 @@ public class GameBoardTest {
   // test setChip() for a step move to the same square.
   @Test
   public void setChip_stepSameSquare() {
-    GameBoard board = new GameBoard();
-
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4}, {2,4} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
 
     int[][] whiteMoves = { {1,1}, {2,1}, {4,1}, {5,1}, {1,3}, {2,3}, {4,3}, {5,3}, {1,5}, {2,5} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
     MoveWithPlayer m1 = new MoveWithPlayer(1, 0, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(1, 1, 1, 1, WHITE_PLAYER);
@@ -184,17 +196,11 @@ public class GameBoardTest {
   // test setChip() for a step move to another occupied square.
   @Test
   public void setChip_stepOccupiedSquare() {
-    GameBoard board = new GameBoard();
-
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4}, {2,4} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
 
     int[][] whiteMoves = { {1,1}, {2,1}, {4,1}, {5,1}, {1,3}, {2,3}, {4,3}, {5,3}, {1,5}, {2,5} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
     MoveWithPlayer m1 = new MoveWithPlayer(2, 0, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(2, 1, 1, 1, WHITE_PLAYER);
@@ -205,55 +211,54 @@ public class GameBoardTest {
         + m2.x2 + "," + m2.y2 + ").", board.setChip(m2));
   }
 
-  // test setChip() for a step move to an unoccupied square.
+  // test setChip() for multiple step moves to an unoccupied square.
   @Test
-  public void setChip_goodMove() {
-    GameBoard board = new GameBoard();
-
+  public void setChip_goodStepMoves() {
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4}, {2,4} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
 
     int[][] whiteMoves = { {1,1}, {2,1}, {4,1}, {5,1}, {1,3}, {2,3}, {4,3}, {5,3}, {1,5}, {2,5} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
+    // move first chip placed
     MoveWithPlayer m1 = new MoveWithPlayer(6, 7, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(7, 6, 1, 1, WHITE_PLAYER);
 
     assertTrue("Should step move to an unoccupied square. From (" + m1.x1 + "," + m1.y1 + ") to (" +
-        m1.x2 + "," + m1.y2 + ").", board.setChip(m1));
+            m1.x2 + "," + m1.y2 + ").", board.setChip(m1));
     assertTrue("Should step move to an unoccupied square. From (" + m2.x1 + "," + m2.y1 + ") to (" +
-        m2.x2 + "," + m2.y2 + ").", board.setChip(m2));
+            m2.x2 + "," + m2.y2 + ").", board.setChip(m2));
+
+    // move last chip placed
+    MoveWithPlayer m3 = new MoveWithPlayer(5, 6, 6, 7, BLACK_PLAYER);
+    MoveWithPlayer m4 = new MoveWithPlayer(6, 6, 7, 6, WHITE_PLAYER);
+    assertTrue("Should step move to an unoccupied square. From (" + m3.x1 + "," + m3.y1 + ") to (" +
+            m3.x2 + "," + m3.y2 + ").", board.setChip(m3));
+    assertTrue("Should step move to an unoccupied square. From (" + m4.x1 + "," + m4.y1 + ") to (" +
+            m4.x2 + "," + m4.y2 + ").", board.setChip(m4));
   }
 
   // test setChip() on illegal step and add moves.
   @Test
   public void setChip_illegalMove() {
-    GameBoard board = new GameBoard();
     // 9 black chips
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
     // 9 white chips
     int[][] whiteMoves = { {1,1}, {2,1}, {4,1}, {5,1}, {1,3}, {2,3}, {4,3}, {5,3}, {1,5}};
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
+    // attempt step move with only 9 chips on board
     MoveWithPlayer m1 = new MoveWithPlayer(6, 6, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(6, 6, 1, 0, WHITE_PLAYER);
 
-    assertFalse("Should not step move with less than 9 chips on the board.", board.setChip(m1));
-    assertFalse("Should not step move with less than 9 chips on the board.", board.setChip(m2));
+    assertFalse("Should not step move with less than 10 chips on the board.", board.setChip(m1));
+    assertFalse("Should not step move with less than 10 chips on the board.", board.setChip(m2));
 
-    // now 10 black and white chips
     board.setChip(new MoveWithPlayer(2, 4, BLACK_PLAYER));
     board.setChip(new MoveWithPlayer(2, 5, WHITE_PLAYER));
 
+    // attempt add move with 10 chips on board
     MoveWithPlayer m3 = new MoveWithPlayer(6, 6, BLACK_PLAYER);
     MoveWithPlayer m4 = new MoveWithPlayer(6, 6, WHITE_PLAYER);
 
@@ -264,12 +269,9 @@ public class GameBoardTest {
   // test setChip() updates internal white/blackChipPositions list correctly.
   @Test
   public void setChip_stepMovesUpdateChipPositionsList() {
-    GameBoard board = new GameBoard();
     // 10 black chips
     int[][] blackMoves = { {1,0}, {2,0}, {4,0}, {5,0}, {1,2}, {2,2}, {4,2}, {5,2}, {1,4}, {2,4} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
     // first step moves, remove original first and last chip
     MoveWithPlayer m1 = new MoveWithPlayer(4, 4, 1, 0, BLACK_PLAYER);
     MoveWithPlayer m2 = new MoveWithPlayer(5, 4, 2, 4, BLACK_PLAYER);
@@ -286,17 +288,12 @@ public class GameBoardTest {
   // test setChip() updates internal goal lists correctly for add moves.
   @Test
   public void setChip_addMovesUpdateGoalLists() {
-    GameBoard board = new GameBoard();
     // 10 black chips
     int[][] blackMoves = {{1, 0}, {2, 0}, {5, 0}, {6, 0}, {1, 7}, {2, 7}, {5, 7}, {6, 7}, {3, 2}, {4, 2}};
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
     // 10 white chips
     int[][] whiteMoves = {{0, 1}, {0, 2}, {0, 5}, {0, 6}, {7, 1}, {7, 2}, {7, 5}, {7, 6}, {5, 3}, {5, 4}};
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
     String[] expectedResults = { "White: { [0, 1] [0, 2] [0, 5] [0, 6] [7, 1] [7, 2] [7, 5] [7, 6] [5, 3] [5, 4] }",
         "Black: { [1, 0] [2, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 2] }",
@@ -309,17 +306,12 @@ public class GameBoardTest {
   // test setChip() updates internal goal lists correctly for step moves.
   @Test
   public void setChip_stepMovesUpdateGoalLists() {
-    GameBoard board = new GameBoard();
     // 10 black chips: 3 in top goal, 3 in bottom goal, 4 in non-goal
     int[][] blackMoves = { {1,0}, {2,0}, {5,0}, {1,7}, {2,7}, {5,7}, {3,2}, {4,2}, {3,5}, {4,5} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
     // 10 white chips: 3 in left goal, 3 in right goal, 4 in non-goal
     int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {7,1}, {7,2}, {7,5}, {2,3}, {2,4}, {5,3}, {5,4} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
     // first step moves, moves a chip in goal to different position in same goal area
     board.setChip(new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER));
     board.setChip(new MoveWithPlayer(0, 6, 0, 5, WHITE_PLAYER));
@@ -362,7 +354,6 @@ public class GameBoardTest {
   // test undoSetChip() before any moves have been made.
   @Test
   public void undoSetChip_noMoves() {
-    GameBoard board = new GameBoard();
     assertFalse("Should not undo move when none has been made.", board.undoSetChip());
     assertFalse("Should not undo move when none has been made.", board.undoSetChip());
   }
@@ -370,10 +361,8 @@ public class GameBoardTest {
   // test undoSetChip() after some add moves made.
   @Test
   public void undoSetChip_undoAddMoves() {
-    GameBoard board = new GameBoard();
-
     // 3 moves to right goal
-    Integer[][] moves = { {7,1}, {7,2}, {7,4} };
+    int[][] moves = { {7,1}, {7,2}, {7,4} };
 
     MoveWithPlayer m1 = new MoveWithPlayer(moves[0][0], moves[0][1], WHITE_PLAYER);
     board.setChip(m1);
@@ -396,16 +385,12 @@ public class GameBoardTest {
   // test undoStepChip() after some step moves made and at boundary between step and add moves.
   @Test
   public void undoSetChip_undoStepMove() {
-    GameBoard board = new GameBoard();
     // 10 black chips
     int[][] addMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
-    for (int[] move : addMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, addMoves, BLACK_PLAYER);
+
     int[][] stepMoves = { {4,3,4,2}, {3,0,2,0} };
-    for (int[] move : stepMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], move[2], move[3], BLACK_PLAYER));
-    }
+    makeMoves(board, stepMoves, BLACK_PLAYER);
 
     String[] expectedResults = { "White: { }",
         "Black: { [1, 0] [5, 0] [6, 0] [1, 7] [2, 7] [5, 7] [6, 7] [3, 2] [4, 3] [3, 0] }",
@@ -435,8 +420,6 @@ public class GameBoardTest {
   // test getValidMoves() on an empty board.
   @Test
   public void getValidMoves_emptyBoard() {
-    GameBoard board = new GameBoard();
-
     List<MoveWithPlayer> player1ValidMoves = board.getValidMoves(WHITE_PLAYER);
     Iterator<MoveWithPlayer> iter1 = player1ValidMoves.iterator();
     for (int y = 1; y < BOARD_SIZE - 1; y++) {
@@ -467,12 +450,8 @@ public class GameBoardTest {
   // test getValidMoves() on a board set up like in "README" file "Legal moves" section.
   @Test
   public void getValidMoves_partialBoard() {
-    GameBoard board = new GameBoard();
-
     int[][] initialMoves = { {3,0}, {2,1}, {2,4}, {1,6}, {5,2}, {5,3}, {6,5}, {4,7} };
-    for (int[] move : initialMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, initialMoves, BLACK_PLAYER);
 
     int[][] whiteMoves = { {0,1}, {1,1}, {3,1}, {4,1}, {5,1}, {6,1}, {7,1}, {0,2}, {1,2},
         {2,2}, {3,2}, {4,2}, {6,2}, {7,2}, {0,3}, {1,3}, {2,3}, {3,3}, {4,3}, {6,3}, {7,3},
@@ -512,7 +491,6 @@ public class GameBoardTest {
   // test getConnections() on an empty board.
   @Test
   public void getConnections_emptyBoard() {
-    GameBoard board = new GameBoard();
     for (int j = 0; j < BOARD_SIZE; j++) {
       for (int i = 0; i < BOARD_SIZE; i++) {
         List<Integer[]> connections1 = board.getConnections(WHITE_PLAYER, i, j);
@@ -540,12 +518,8 @@ public class GameBoardTest {
   // test getConnections() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void getConnections_partialBoard() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
 
     String[] expectedResult = {
@@ -576,17 +550,11 @@ public class GameBoardTest {
   // test getConnections() on chips only in goals.
   @Test
   public void getConnections_multipleInGoal() {
-    GameBoard board = new GameBoard();
-
     int[][] blackMoves = { {1,0}, {2,7}, {3,0}, {4,7}, {5,0}, {6,7} };
-    for (int[] move : blackMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves, BLACK_PLAYER);
 
     int[][] whiteMoves = { {0,1}, {7,2}, {0,3}, {7,4}, {0,5}, {7,6} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
     for (int[] move : blackMoves) {
       int x = move[0];
@@ -610,8 +578,6 @@ public class GameBoardTest {
   // test getConnections() on a chip added to an empty board
   @Test
   public void getConnections_singleChip() {
-    GameBoard board = new GameBoard();
-
     board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
 
     List<Integer[]> connections = board.getConnections(WHITE_PLAYER, 3, 3);
@@ -622,14 +588,10 @@ public class GameBoardTest {
   // test getConnections() on a chip with connections in all directions.
   @Test
   public void getConnections_connectionInAllDirections() {
-    GameBoard board = new GameBoard();
-
     board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
 
     int[][] whiteMoves = { {3, 1}, {3, 6}, {0,3}, {7,3}, {1,1}, {5,1}, {0,6}, {6,6} };
-    for (int[] move : whiteMoves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
 
     List<Integer[]> connections = board.getConnections(WHITE_PLAYER,3, 3);
     String result = connectionToString(connections);
@@ -643,20 +605,14 @@ public class GameBoardTest {
   // from opposing side.
   @Test
   public void getConnections_connectionInAllDirectionsBlocked() {
-    GameBoard board = new GameBoard();
-
     // test blocking connection to upper left and upper right
     board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
 
     int[][] whiteMoves1 = { {1,1}, {5,1} };
-    for (int[] move : whiteMoves1) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves1, WHITE_PLAYER);
 
     int[][] blackMoves1 = { {2, 2}, {4,2} };
-    for (int[] move : blackMoves1) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves1, BLACK_PLAYER);
 
     List<Integer[]> connections = board.getConnections(WHITE_PLAYER,3, 3);
     String result = connectionToString(connections);
@@ -668,14 +624,10 @@ public class GameBoardTest {
     board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
 
     int[][] whiteMoves2 = { {3, 1}, {3, 6}, {0,3}, {7,3}, {0,6}, {6,6} };
-    for (int[] move : whiteMoves2) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], WHITE_PLAYER));
-    }
+    makeMoves(board, whiteMoves2, WHITE_PLAYER);
 
     int[][] blackMoves2 = { {3, 2}, {3, 5}, {1,3}, {5,3}, {1,5}, {5,5} };
-    for (int[] move : blackMoves2) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, blackMoves2, BLACK_PLAYER);
 
     connections = board.getConnections(WHITE_PLAYER,3, 3);
     result = connectionToString(connections);
@@ -686,12 +638,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_noBottomGoalChip() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, /*{5,7}*/ };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     assertFalse("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
@@ -699,12 +647,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_noTopGoalChip() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { /*{2,0}, {6,0},*/ {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     assertFalse("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
@@ -712,12 +656,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_noTopOrBottomGoalChips() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { /*{2,0}, {6,0},*/ {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}/*, {5,7}*/ };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     assertFalse("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
@@ -725,12 +665,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_goodNetwork1() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, {3,5}, {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     // 20 - 25 - 35 - 33 - 55 - 57
     assertTrue("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
@@ -739,12 +675,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_goodNetwork2() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     // 60 - 65 - 55 - 33 - 35 - 57
     assertTrue("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
@@ -753,12 +685,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_goodNetwork3() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { {2,0}, {6,0}, {4,2}, {1,3}, {3,3}, {2,5}, /*{3,5},*/ {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     // 60 - 65 - 55 - 33 - 13 - 57
     assertTrue("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
@@ -767,12 +695,8 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_allChipsFormNetwork() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { /*{2,0},*/ {6,0}, /*{4,2}, {1,3},*/ {3,3}, /*{2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     // 60 - 65 - 55 - 33 - 35 - 57
     assertTrue("Board has a valid network.", board.hasValidNetwork(BLACK_PLAYER));
@@ -781,41 +705,125 @@ public class GameBoardTest {
   // test hasValidNetwork() on a board set up like in "README" file "Object of Play" section.
   @Test
   public void hasValidNetwork_shortOneChipNoNetwork() {
-    GameBoard board = new GameBoard();
-
     int[][] moves = { /*{2,0},*/ {6,0}, /*{4,2}, {1,3}, {3,3}, {2,5},*/ {3,5}, {5,5}, {6,5}, {5,7} };
-    for (int[] move : moves) {
-      board.setChip(new MoveWithPlayer(move[0], move[1], BLACK_PLAYER));
-    }
+    makeMoves(board, moves, BLACK_PLAYER);
     board.setChip(new MoveWithPlayer(4, 5, WHITE_PLAYER));
     assertFalse("Board should not have a valid network.", board.hasValidNetwork(BLACK_PLAYER));
   }
 
-  // test getZobristKey() on different board states.
+  // test getZobristKey() for subsequent calls when board state does not change
   @Test
-  public void getZobristKey_normalOperation() {
-    GameBoard board1 = new GameBoard();
-    GameBoard board2 = new GameBoard();
+  public void getZobristKey_subsequentCalls() {
+      long key1 = board.getZobristKey();
+      long key2 = board.getZobristKey();
+      assertEquals("Zobrist key same when board state doesn't change.", key1, key2);
 
-    long zobristKey1 = board1.getZobristKey();
-    long zobristKey2 = board1.getZobristKey();
-    assertEquals("Zobrist key matches for subsequent call to getZobristKey().", zobristKey1, zobristKey2);
+      board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
+      long key3 = board.getZobristKey();
+      long key4 = board.getZobristKey();
+      assertEquals("Zobrist key same when board state doesn't change.", key3, key4);
+  }
 
-    board1.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
-    long zobristKey3 = board1.getZobristKey();
-    assertNotEquals("Zobrist key different when board state changes.", zobristKey1, zobristKey3);
+  // test getZobristKey() for add moves
+  @Test
+  public void getZobristKey_addMove() {
+    long key1 = board.getZobristKey();
+    board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
+    long key2 = board.getZobristKey();
+    assertNotEquals("Zobrist key different after add move.", key1, key2);
 
-    board2.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
-    long zobristKey4 = board1.getZobristKey();
-    assertEquals("Zobrist key matches for different GameBoards with same state.", zobristKey3, zobristKey4);
+    board.setChip(new MoveWithPlayer(3, 4, BLACK_PLAYER));
+    long key3 = board.getZobristKey();
+    assertTrue("Zobrist key different after add move.", key1 != key3 && key2 != key3);
+  }
 
-    board2.undoSetChip();
-    long zobristKey5 = board2.getZobristKey();
-    assertNotEquals("Zobrist key matches after undoing move.", zobristKey1, zobristKey5);
+  // test getZobristKey() for step moves
+  @Test
+  public void getZobristKey_stepMove() {
+    // 10 black chips
+    int[][] blackMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
+    makeMoves(board, blackMoves, BLACK_PLAYER);
+    // 10 white chips
+    int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {0,6}, {7,1}, {7,2}, {7,5}, {7,6}, {5,3}, {5,4} };
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
+    long key1 = board.getZobristKey();
 
-    board2.setChip(new MoveWithPlayer(3, 3, BLACK_PLAYER));
-    long zobristKey6 = board2.getZobristKey();
-    assertNotEquals("Zobrist key different for different color move in same square.", zobristKey4, zobristKey6);
+    // make step move
+    MoveWithPlayer m1 = new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER);
+    board.setChip(m1);
+    long key2 = board.getZobristKey();
+    assertNotEquals("Zobrist key different after step move.", key1, key2);
+
+    // make another step move
+    MoveWithPlayer m2 = new MoveWithPlayer(0, 3, 0, 1, WHITE_PLAYER);
+    board.setChip(m2);
+    long key3 = board.getZobristKey();
+    assertTrue("Zobrist key different after another step move.", key3 != key1 && key3 != key2);
+  }
+
+  // test getZobristKey() for undo add moves
+  @Test
+  public void getZobristKey_undoAddMoves() {
+    // undo one add move
+    long key1 = board.getZobristKey();
+    board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
+    board.undoSetChip();
+    long key2 = board.getZobristKey();
+    assertEquals("Zobrist key reverts after undoing add move.", key1, key2);
+
+    // undo 2 add moves
+    board.setChip(new MoveWithPlayer(3, 3, WHITE_PLAYER));
+    long key3 = board.getZobristKey();  // after 1 add move
+    board.setChip(new MoveWithPlayer(3, 4, BLACK_PLAYER));
+    board.undoSetChip();
+    long key4 = board.getZobristKey();  // should match key4
+    assertEquals("Zobrist key reverts after undoing add move.", key3, key4);
+    board.undoSetChip();
+    long key5 = board.getZobristKey();  // should match key2
+    assertEquals("Zobrist key reverts after undoing add move.", key2, key5);
+  }
+
+  // test getZobristKey() for undo step moves
+  @Test
+  public void getZobristKey_undoStepMoves() {
+    // 10 black chips
+    int[][] blackMoves = { {1,0}, {2,0}, {5,0}, {6,0}, {1,7}, {2,7}, {5,7}, {6,7}, {3,2}, {4,2} };
+    makeMoves(board, blackMoves, BLACK_PLAYER);
+    // 10 white chips
+    int[][] whiteMoves = { {0,1}, {0,2}, {0,5}, {0,6}, {7,1}, {7,2}, {7,5}, {7,6}, {5,3}, {5,4} };
+    makeMoves(board, whiteMoves, WHITE_PLAYER);
+    long key1 = board.getZobristKey();
+
+    // make step moves
+    MoveWithPlayer m1 = new MoveWithPlayer(3, 0, 1, 0, BLACK_PLAYER);
+    MoveWithPlayer m2 = new MoveWithPlayer(0, 3, 0, 1, WHITE_PLAYER);
+    board.setChip(m1);
+    long key2 = board.getZobristKey();  // after 1 step move
+    board.setChip(m2);
+
+    // undo step moves
+    board.undoSetChip();
+    long key3 = board.getZobristKey(); // should match key2
+    assertEquals("Zobrist key reverts after undoing step move", key2, key3);
+    board.undoSetChip();
+    long key4 = board.getZobristKey(); // should match key1
+    assertEquals("Zobrist key reverts after undoing step move", key1, key4);
+  }
+
+  // test getZobristKey() for different players moving to same board position
+  @Test
+  public void getZobristKey_differentPlayers() {
+    MoveWithPlayer m1 = new MoveWithPlayer(3, 3, WHITE_PLAYER);
+    MoveWithPlayer m2 = new MoveWithPlayer(3, 3, BLACK_PLAYER);
+
+    board.setChip(m1);
+    long key1 = board.getZobristKey();
+
+    board.undoSetChip();
+    board.setChip(m2);
+    long key2 = board.getZobristKey();
+
+    assertNotEquals("Zobrist key different for move to same position for different players.", key1, key2);
   }
 
 }
